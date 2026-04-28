@@ -3,7 +3,9 @@ const { useState: useStateC, useEffect: useEffectC, useRef: useRefC } = React;
 
 // Radar chart: 4 axes, value 0..5
 function RadarChart({ data, size = 360 }) {
-  const cx = size / 2, cy = size / 2;
+  const pad = 60;
+  const full = size + pad * 2;
+  const cx = full / 2, cy = full / 2;
   const R = size * 0.38;
   const levels = 5;
   const axes = data.length;
@@ -62,7 +64,7 @@ function RadarChart({ data, size = 360 }) {
   });
 
   return (
-    <svg ref={ref} viewBox={`0 0 ${size} ${size}`} className="w-full max-w-[420px] mx-auto">
+    <svg ref={ref} viewBox={`0 0 ${full} ${full}`} className="w-full max-w-[420px] mx-auto">
       {gridPolys}
       {axesLines}
       <polygon points={dataPts} fill="#059669" fillOpacity="0.14" stroke="#059669" strokeWidth="1.5" strokeLinejoin="round" />
