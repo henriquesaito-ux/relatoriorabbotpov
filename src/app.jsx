@@ -737,7 +737,7 @@ function App() {
       <ReportMode />
       <button
         onClick={() => setPresMode(true)}
-        className="fixed bottom-6 right-6 z-50 w-10 h-10 rounded-full bg-stone-200/80 hover:bg-stone-300 flex items-center justify-center text-stone-600 hover:text-ink transition shadow-sm"
+        className="fixed bottom-6 right-6 z-50 w-10 h-10 rounded-full bg-stone-200/80 hover:bg-stone-300 hidden md:flex items-center justify-center text-stone-600 hover:text-ink transition shadow-sm"
         title="Modo apresentação"
       >
         <IconLayout size={18} strokeWidth={1.5} />

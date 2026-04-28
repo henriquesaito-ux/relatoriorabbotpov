@@ -205,7 +205,7 @@ function AgenteVisaoGeral() {
       </div>
 
       {/* 3. Cards de tipo de parada */}
-      <div className="grid grid-cols-3 gap-3 mb-10">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-10">
         {[
           { tipo: 'Pernoite', oc: 365, antes: '12.4h', depois: '11.3h', red: '1.1h',
             iconSvg: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg> },
@@ -473,7 +473,7 @@ function AgentePorMacro() {
           </div>
 
           {/* 4 mini-cards */}
-          <div className="grid grid-cols-4 gap-3 mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
             <div className="bg-white/[0.03] border border-white/5 rounded-xl p-4">
               <div className="text-[10px] font-medium text-stone-500 uppercase tracking-wider mb-2">Antes</div>
               <div className="text-xl font-semibold text-stone-500 line-through tabular-nums">{m.antes}</div>
@@ -669,10 +669,10 @@ function AgentePorPlaca() {
   return (
     <div>
       {/* Sub-tabs pill */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 mb-6 overflow-x-auto no-scrollbar flex-nowrap">
         {subTabs.map((t) => (
           <button key={t.key} onClick={() => setSubTab(t.key)}
-            className={`px-5 py-2 rounded-full text-sm font-medium transition ${subTab === t.key ? 'bg-brand-600 text-white' : 'bg-transparent border border-white/15 text-stone-400 hover:text-white hover:border-white/30'}`}>
+            className={`px-5 py-2 rounded-full text-sm font-medium transition whitespace-nowrap ${subTab === t.key ? 'bg-brand-600 text-white' : 'bg-transparent border border-white/15 text-stone-400 hover:text-white hover:border-white/30'}`}>
             {t.label}
           </button>
         ))}
@@ -680,7 +680,8 @@ function AgentePorPlaca() {
 
       {/* Table */}
       <DC className="overflow-hidden">
-        <div className="grid grid-cols-[50px_1fr_1fr_1fr_1fr_40px] bg-white/[0.03] text-[10px] font-medium uppercase tracking-wider text-stone-500 border-b border-white/10">
+        <div className="overflow-x-auto">
+        <div className="grid grid-cols-[50px_1fr_1fr_1fr_1fr_40px] bg-white/[0.03] text-[10px] font-medium uppercase tracking-wider text-stone-500 border-b border-white/10" style={{ minWidth: 550 }}>
           <div className="px-4 py-3">#</div>
           <div className="px-4 py-3">Placa</div>
           <div className="px-4 py-3 text-right">Apontamentos</div>
@@ -691,7 +692,7 @@ function AgentePorPlaca() {
         {rows.map((r, i) => (
           <div key={i}
             onClick={() => setModal({ placa: r.placa, tipo: subTab, apts: r.apts })}
-            className={`grid grid-cols-[50px_1fr_1fr_1fr_1fr_40px] border-b last:border-b-0 border-white/5 items-center cursor-pointer transition hover:bg-white/[0.04] ${r.best ? 'bg-brand-600/10' : ''}`}>
+            className={`grid grid-cols-[50px_1fr_1fr_1fr_1fr_40px] border-b last:border-b-0 border-white/5 items-center cursor-pointer transition hover:bg-white/[0.04] ${r.best ? 'bg-brand-600/10' : ''}`} style={{ minWidth: 550 }}>
             <div className="px-4 py-3.5 text-sm text-stone-500 tabular-nums">{i + 1}</div>
             <div className="px-4 py-3.5 flex items-center gap-2">
               <span className="placa text-sm font-medium text-white">{r.placa}</span>
@@ -705,6 +706,7 @@ function AgentePorPlaca() {
             </div>
           </div>
         ))}
+        </div>
       </DC>
 
       {/* Modal */}
@@ -731,7 +733,7 @@ function AgenteCTA() {
   return (
     <section id="agente" className="scroll-mt-20 px-5 md:px-8 py-12 md:py-16" style={{ backgroundColor: '#1c1917' }}>
       <div className="max-w-6xl mx-auto">
-        <div className="mb-8 flex items-start justify-between gap-4">
+        <div className="mb-8 flex flex-col md:flex-row items-start justify-between gap-4">
           <div>
             <h2 className="text-2xl md:text-3xl font-semibold tracking-tight leading-[1.15] text-white">
               Agente de <span className="text-brand-500">Disponibilidade</span>
@@ -745,10 +747,10 @@ function AgenteCTA() {
           </a>
         </div>
 
-        <div className="flex border-b border-white/10 mb-8">
+        <div className="flex border-b border-white/10 mb-8 overflow-x-auto no-scrollbar">
           {tabs.map((t) => (
             <button key={t.key} onClick={() => setTab(t.key)}
-              className={`px-5 py-2.5 text-sm font-medium transition border-b-2 -mb-px ${tab === t.key ? 'border-brand-500 text-white' : 'border-transparent text-stone-500 hover:text-stone-300'}`}>
+              className={`px-5 py-2.5 text-sm font-medium transition border-b-2 -mb-px whitespace-nowrap ${tab === t.key ? 'border-brand-500 text-white' : 'border-transparent text-stone-500 hover:text-stone-300'}`}>
               {t.label}
             </button>
           ))}

@@ -218,10 +218,10 @@ function ChecklistsSection() {
         </a>
       </div>
       <div>
-        <div className="flex border-b border-stone-200/70">
+        <div className="flex border-b border-stone-200/70 overflow-x-auto no-scrollbar">
           {tabs.map((t) => (
             <button key={t.key} onClick={() => setView(t.key)}
-              className={`flex-1 px-4 py-2.5 text-sm font-medium transition flex items-center justify-center gap-1.5 border-b-2 -mb-px ${view === t.key ? 'border-brand-600 text-ink' : 'border-transparent text-muted hover:text-ink'}`}>
+              className={`flex-1 md:flex-1 flex-shrink-0 px-4 py-2.5 text-sm font-medium transition flex items-center justify-center gap-1.5 border-b-2 -mb-px whitespace-nowrap ${view === t.key ? 'border-brand-600 text-ink' : 'border-transparent text-muted hover:text-ink'}`}>
               {t.icon}{t.label}
               <span className={`text-[10px] font-mono tabular-nums px-1.5 py-0.5 rounded ${view === t.key ? 'bg-brand-50 text-brand-700' : 'bg-stone-100 text-muted'}`}>{t.count}</span>
             </button>
@@ -405,7 +405,8 @@ function AntesDepoisSection() {
           <h3 className="text-lg font-semibold text-ink tracking-tight mb-1">BTime × Rabbot</h3>
           <p className="text-sm text-subink mb-6">O sistema atual registra. A Rabbot age.</p>
 
-          <div className="border border-stone-200/70 rounded-xl overflow-hidden mb-10">
+          <div className="overflow-x-auto">
+          <div className="border border-stone-200/70 rounded-xl overflow-hidden mb-10" style={{ minWidth: 600 }}>
             <div className="grid grid-cols-[1.2fr_1.5fr_1.5fr] bg-stone-50 border-b border-stone-200/70 text-[10px] font-medium uppercase tracking-wider text-muted">
               <div className="px-4 py-2.5">Aspecto</div>
               <div className="px-4 py-2.5">BTime (hoje)</div>
@@ -425,6 +426,7 @@ function AntesDepoisSection() {
                 <div className="px-4 py-3.5 text-sm font-medium text-ink border-l-2 border-brand-600/30">{row.rabbot}</div>
               </div>
             ))}
+          </div>
           </div>
 
           <div className="text-center py-8">
