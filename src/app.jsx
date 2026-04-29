@@ -221,7 +221,7 @@ function SlideBlitz({ active }) {
           <div className="text-xs font-semibold uppercase tracking-wider text-muted mb-5">Timeline do dia</div>
           <div className="relative">
             <div className="absolute top-[5px] left-2 right-2 h-px bg-brand-200" />
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 relative">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-6 relative">
               {TIMELINE.map((t, i) => (
                 <div key={i}>
                   <div className="w-3 h-3 rounded-full bg-white border-2 border-brand-600 relative z-10 shadow-sm" />

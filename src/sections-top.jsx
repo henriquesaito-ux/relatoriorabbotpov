@@ -5,7 +5,7 @@ const NAV_ITEMS = [
   { id: 'sobre', label: 'Sobre' },
   { id: 'diagnostico', label: 'Diagnóstico' },
   { id: 'blitz', label: 'Blitz' },
-  { id: 'checklists', label: 'Checklists' },
+  { id: 'checklists', label: 'Dados coletados' },
   { id: 'antes-depois', label: 'Antes × Depois' },
   { id: 'agente', label: 'Agente IA' },
 ];
@@ -115,7 +115,7 @@ function Hero() {
             <img src="assets/rodojacto-logo.png" alt="Rodojacto" className="h-8 md:h-10 w-auto shrink-0 mt-1" />
           </div>
           <p className="mt-3 text-sm text-subink tabular-nums">
-            {CLIENT.periodStart} a {CLIENT.periodEnd} · {CLIENT.city}
+            {CLIENT.city}
           </p>
         </Reveal>
       </div>
@@ -180,11 +180,11 @@ function BlitzSection() {
         <Card grad className="mt-6 p-5 md:p-6">
           <div className="flex items-center justify-between mb-5">
             <div className="text-sm font-semibold text-ink tracking-tight">Timeline do dia</div>
-            <div className="text-xs font-mono text-muted tabular-nums">14/04/2026</div>
+            <div className="text-xs font-mono text-muted tabular-nums">{CLIENT.blitzDate}</div>
           </div>
           <div className="relative">
             <div className="absolute top-[3px] left-1 right-1 h-px bg-stone-200" />
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-5 relative">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-5 relative">
               {TIMELINE.map((t, i) => (
                 <div key={i} className="relative">
                   <div className="w-2 h-2 rounded-full bg-white border border-brand-600 relative z-10" />
@@ -266,42 +266,61 @@ function BenchmarkBar({ label, value, valueLabel, rangeMin, rangeMax, scaleMax, 
 function DiagSection() {
   const radarData = DIAG.map(d => ({ label: d.dim, value: d.level }));
   const levelTone = (l) => l <= 2 ? 'amber' : l === 3 ? 'brand' : 'brand';
-  const markerPct = 78;
+
 
   return (
     <Section id="diagnostico" className="bg-white border-y border-stone-200/70">
-      <SectionHeader title="Diagnóstico" subtitle="Análise completa da operação da Rodojacto — indicadores comparados ao mercado e maturidade técnica." />
+      <SectionHeader title="Diagnóstico" />
+
+      {/* Introdução geral */}
+      <Reveal>
+        <p className="text-sm text-subink leading-relaxed mb-10">
+          Os indicadores abaixo foram coletados durante a Blitz, em entrevistas e observação direta com o time operacional da Rodojacto. Cada métrica é comparada à média do mercado de transporte rodoviário brasileiro para situar a operação em relação ao setor.
+        </p>
+      </Reveal>
 
       {/* ── Bloco 1: Diagnóstico da operação ── */}
       <Reveal>
         <div className="mb-12">
           <h3 className="text-lg font-semibold text-ink tracking-tight mb-1">Diagnóstico da sua operação</h3>
-          <p className="text-sm text-subink mb-6">Indicadores-chave da Rodojacto comparados à média de mercado.</p>
+          <p className="text-sm text-subink mb-4">Indicadores-chave da Rodojacto comparados à média de mercado.</p>
+          <div className="rounded-lg border-l-[3px] border-emerald-500 bg-stone-50 px-4 py-3 mb-6">
+            <p className="text-[13px] text-subink leading-relaxed"><span className="font-medium text-ink">Como ler:</span> o ponto escuro indica a posição da Rodojacto em cada métrica. A faixa cinza representa o intervalo observado no mercado. Quanto mais centralizado dentro da faixa — ou além dela, no sentido positivo — melhor o desempenho relativo ao setor.</p>
+          </div>
           <Card grad className="p-5 md:p-6">
-            <BenchmarkBar
-              label="Taxa de utilização"
-              value={56} valueLabel="56%"
-              rangeMin={30} rangeMax={75}
-              scaleMax={100}
-              ticks={[0,10,20,30,40,50,60,70,80,90,100]}
-              unit="%" color="green"
-            />
-            <BenchmarkBar
-              label="Mix manutenção"
-              value={30} valueLabel="30%"
-              rangeMin={10} rangeMax={80}
-              scaleMax={100}
-              ticks={[0,10,20,30,40,50,60,70,80,90,100]}
-              unit="%" color="coral"
-            />
-            <BenchmarkBar
-              label="Custo manutenção"
-              value={4000} valueLabel="R$ 4.0k"
-              rangeMin={500} rangeMax={5500}
-              scaleMax={6000}
-              ticks={[0,1000,2000,3000,4000,5000,6000]}
-              unit="R$" color="blue"
-            />
+            <div>
+              <BenchmarkBar
+                label="Taxa de utilização"
+                value={56} valueLabel="56%"
+                rangeMin={30} rangeMax={75}
+                scaleMax={100}
+                ticks={[0,10,20,30,40,50,60,70,80,90,100]}
+                unit="%" color="green"
+              />
+              <p className="text-[11px] text-stone-400 leading-snug mt-1 mb-4">Percentual do tempo em que a frota está produtiva (em rota ou operação ativa).</p>
+            </div>
+            <div>
+              <BenchmarkBar
+                label="Mix manutenção"
+                value={30} valueLabel="30%"
+                rangeMin={10} rangeMax={80}
+                scaleMax={100}
+                ticks={[0,10,20,30,40,50,60,70,80,90,100]}
+                unit="%" color="coral"
+              />
+              <p className="text-[11px] text-stone-400 leading-snug mt-1 mb-4">Proporção entre manutenções preventivas e corretivas. Operações maduras têm mix mais alto.</p>
+            </div>
+            <div>
+              <BenchmarkBar
+                label="Custo manutenção"
+                value={4000} valueLabel="R$ 4.0k"
+                rangeMin={500} rangeMax={5500}
+                scaleMax={6000}
+                ticks={[0,1000,2000,3000,4000,5000,6000]}
+                unit="R$" color="blue"
+              />
+              <p className="text-[11px] text-stone-400 leading-snug mt-1">Custo médio mensal de manutenção por veículo. Inclui peças, mão de obra e paradas operacionais.</p>
+            </div>
           </Card>
         </div>
       </Reveal>
@@ -310,7 +329,7 @@ function DiagSection() {
       <Reveal delay={60}>
         <div className="mb-12">
           <h3 className="text-lg font-semibold text-ink tracking-tight mb-1">Distribuição do tempo da frota</h3>
-          <p className="text-sm text-subink mb-6">Onde o tempo da operação realmente acontece, em % do total.</p>
+          <p className="text-sm text-subink mb-4">Onde o tempo da operação realmente acontece, em % do total.</p>
           <Card grad className="p-5 md:p-6">
             {/* Stacked bar */}
             <div className="flex rounded-xl overflow-hidden" style={{ height: 64 }}>
@@ -330,13 +349,13 @@ function DiagSection() {
             {/* Legend */}
             <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-4">
               {[
-                { label: 'Rota', value: 56, color: '#047857' },
-                { label: 'Manutenção', value: 18, color: '#78716c' },
-                { label: 'Pátio', value: 14, color: '#a8a29e' },
-                { label: 'Cliente', value: 7, color: '#c8c5c0' },
-                { label: 'Espera', value: 5, color: '#d6d3d1' },
+                { label: 'Rota', value: 56, color: '#047857', desc: 'Veículo em movimento, gerando receita' },
+                { label: 'Manutenção', value: 18, color: '#78716c', desc: 'Em oficina ou aguardando peça' },
+                { label: 'Pátio', value: 14, color: '#a8a29e', desc: 'Parado em pátio, disponível mas sem carga' },
+                { label: 'Cliente', value: 7, color: '#c8c5c0', desc: 'Aguardando em cliente (carga/descarga)' },
+                { label: 'Espera', value: 5, color: '#d6d3d1', desc: 'Demais paradas não produtivas' },
               ].map((s, i) => (
-                <div key={i} className="flex items-center gap-1.5">
+                <div key={i} className="flex items-center gap-1.5" title={s.desc}>
                   <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: s.color }} />
                   <span className="text-xs text-subink">{s.label}</span>
                   <span className="text-xs font-medium text-ink tabular-nums">{s.value}%</span>
@@ -360,6 +379,13 @@ function DiagSection() {
             </div>
           </Card>
         </div>
+      </Reveal>
+
+      {/* Transição para maturidade */}
+      <Reveal delay={80}>
+        <p className="text-sm text-subink leading-relaxed my-12 py-6 border-t border-b border-stone-200/70">
+          Os números acima mostram onde a operação está hoje. O diagnóstico de maturidade abaixo explica <span className="font-medium text-ink">por que</span> ela está nesse patamar — e o que precisa evoluir tecnicamente para mudar de fase.
+        </p>
       </Reveal>
 
       {/* ── Bloco 3: Maturidade técnica ── */}
@@ -404,44 +430,86 @@ function DiagSection() {
 
       {/* ── Bloco 3: Curva de maturidade ── */}
       <Reveal delay={250}>
-        <Card className="p-5 md:p-8">
-          <div className="text-sm font-semibold text-ink mb-5">Curva de maturidade operacional</div>
-          <div className="relative mb-4">
-            <div className="flex h-10 rounded-lg overflow-hidden border border-stone-200/70">
-              {PHASES.map((p, i) => {
-                const bg = ['bg-stone-100', 'bg-brand-50', 'bg-brand-100', 'bg-brand-200/80'][i];
-                const fg = ['text-stone-700', 'text-brand-800', 'text-brand-800', 'text-brand-900'][i];
-                return (
-                  <div key={p.key} className={`${bg} ${fg} flex items-center justify-center text-xs font-medium border-r last:border-r-0 border-white`} style={{ width: `${p.pct}%` }}>
-                    {p.pct}%
-                  </div>
-                );
-              })}
-            </div>
-            <div className="absolute -top-2 -bottom-2 flex flex-col items-center" style={{ left: `calc(${markerPct}% - 44px)`, width: 88 }}>
-              <div className="text-[10px] font-medium uppercase tracking-wider text-brand-700 whitespace-nowrap bg-white px-2 py-0.5 rounded border border-brand-200">Você está aqui</div>
-              <div className="w-px flex-1 bg-brand-600 mt-1" />
-              <div className="w-2 h-2 rounded-full bg-brand-600 ring-4 ring-white -mt-1" />
+        <Card className="p-6 md:p-10">
+          {/* Header */}
+          <div className="mb-6">
+            <h3 className="text-base md:text-lg font-semibold text-ink tracking-tight">Maturidade de Gestão Operacional</h3>
+            <p className="text-xs text-muted mt-0.5">Rumo a uma gestão exponencial</p>
+          </div>
+
+          {/* Badge "Você está aqui" */}
+          <div className="flex justify-center mb-3">
+            <div className="bg-brand-600 text-white text-[10px] font-medium tracking-wide px-3 py-1 rounded-full whitespace-nowrap" role="status" aria-label="Fase atual: Adaptativo / Proativo">
+              Você está aqui
             </div>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-10">
+
+          {/* Barra segmentada — alinhada ao grid de 4 cards */}
+          <div className="hidden lg:grid grid-cols-4 gap-2 mb-4" role="group" aria-label="Distribuição por fase de maturidade">
+            {[
+              { pct: 70, cols: 1 },
+              { pct: 20, cols: 2, active: true },
+              { pct: 10, cols: 1 },
+            ].map((seg, i) => (
+              <div
+                key={i}
+                className={`flex items-center justify-center h-10 text-xs font-medium rounded-lg ${
+                  seg.active
+                    ? 'bg-ink text-white'
+                    : 'bg-stone-100 text-stone-500 border border-stone-200/70'
+                }`}
+                style={{ gridColumn: `span ${seg.cols}` }}
+                role="meter"
+                aria-label={`${seg.pct}%`}
+                aria-valuenow={seg.pct}
+                aria-valuemin={0}
+                aria-valuemax={100}
+              >
+                {seg.pct}%
+              </div>
+            ))}
+          </div>
+          {/* Mobile bar */}
+          <div className="flex lg:hidden gap-2 mb-4" role="group" aria-label="Distribuição por fase de maturidade">
+            {[
+              { pct: 70 },
+              { pct: 20, active: true },
+              { pct: 10 },
+            ].map((seg, i) => (
+              <div
+                key={i}
+                className={`flex items-center justify-center h-10 text-xs font-medium rounded-lg ${
+                  seg.active
+                    ? 'bg-ink text-white flex-[2]'
+                    : 'bg-stone-100 text-stone-500 border border-stone-200/70 flex-1'
+                }`}
+              >
+                {seg.pct}%
+              </div>
+            ))}
+          </div>
+
+          {/* Cards das fases */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {PHASES.map((p, i) => {
-              const active = i === 1;
+              const isActive = i === 1;
               return (
-                <div key={p.key} className={`p-4 rounded-xl border ${active ? 'border-brand-600 bg-brand-50/40' : 'border-stone-200/70 bg-white'}`}>
-                  <div className="flex items-center justify-between">
+                <div key={p.key} className={`p-4 rounded-xl border ${isActive ? 'border-brand-500/60 bg-brand-50/20' : 'border-stone-200/70 bg-white'}`}>
+                  <div className="flex items-center justify-between mb-0.5">
                     <div className="text-[11px] font-medium uppercase tracking-wider text-muted">{p.sub}</div>
-                    {active && <Pill tone="brand">Atual</Pill>}
+                    {isActive && <span className="text-[10px] font-medium text-brand-600">Atual</span>}
                   </div>
-                  <div className="mt-1.5 text-base font-semibold text-ink">{p.title}</div>
-                  <div className="mt-1.5 text-xs text-subink leading-relaxed">{p.desc}</div>
+                  <div className="text-sm font-semibold text-ink mb-1.5">{p.title}</div>
+                  <div className="text-xs text-subink leading-relaxed">{p.desc}</div>
                 </div>
               );
             })}
           </div>
-          <div className="mt-6 pt-6 border-t border-stone-200/70 text-center">
+
+          {/* Rodapé com meta */}
+          <div className="mt-8 pt-6 border-t border-stone-200/70 text-center">
             <p className="text-sm text-subink">
-              Você está em <span className="font-semibold text-ink">Adaptativo</span>. Meta: <span className="font-semibold text-brand-600">Proativo</span> em 90 dias.
+              <span className="font-semibold text-ink">Meta:</span> Avançar da gestão <span className="font-semibold text-ink">Adaptativa</span> para uma operação <span className="font-semibold text-brand-600">Proativa</span>, automatizada e integrada.
             </p>
           </div>
         </Card>
@@ -454,11 +522,22 @@ function DiagSection() {
 function MaturidadeSection() { return null; }
 
 function SobreSection() {
-  const CLIENTS_LIST = [
-    'ABC Cargas', 'Brasilweb', 'Contatto', 'Coca-Cola Andina',
-    'Grupo Petrópolis', 'Gerdau', 'Imediato Nexway', 'Tegma',
-    'Brasspress', 'TransBen', 'Bora Transportes',
+  const CLIENTS_WITH_LOGO = [
+    { name: 'ABC Cargas', logo: 'assets/logos/abccargas.png' },
+    { name: 'Brasilweb', logo: 'assets/logos/brasilweb-logo.png', h: 16 },
+    { name: 'Contatto', logo: 'assets/logos/contatto.png?v=2', h: 22 },
+    { name: 'Coca-Cola Andina', logo: 'assets/logos/cocacola.png', h: 54 },
+    { name: 'Grupo Petrópolis', logo: 'assets/logos/grupopetropolis.png', h: 30 },
+    { name: 'Gerdau', logo: 'assets/logos/gerdau-logo.png', h: 54 },
+    { name: 'Imediato Nexway', logo: 'assets/logos/imediato.png?v=2' },
+    { name: 'Tegma', logo: 'assets/logos/tegma.png?v=2' },
+    { name: 'Brasspress', logo: 'assets/logos/braspress.png', h: 54 },
+    { name: 'TransBen', logo: 'assets/logos/transben.png?v=2', h: 22 },
+    { name: 'Bora Transportes', logo: 'assets/logos/bora.png', h: 54 },
+    { name: 'PepsiCo', logo: 'assets/logos/pepsico-logo.png', h: 54 },
+    { name: 'Bauminas', logo: 'assets/logos/bauminas-logo.png', h: 54 },
   ];
+  const CLIENTS_TEXT = [];
   return (
     <Section id="sobre" className="bg-white border-y border-stone-200/70">
       <SectionHeader
@@ -526,10 +605,66 @@ function SobreSection() {
       {/* Quem confia na Rabbot */}
       <Reveal delay={240}>
         <div className="text-sm font-semibold text-ink mb-5">Quem confia na Rabbot</div>
-        <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
-          {CLIENTS_LIST.map((name, i) => (
-            <span key={i} className="text-sm font-medium text-stone-400 whitespace-nowrap">{name}</span>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '24px 32px', alignItems: 'center', justifyItems: 'center' }}>
+          {CLIENTS_WITH_LOGO.map((c, i) => (
+            <div key={`logo-${i}`} style={{ width: '100%', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <img src={c.logo} alt={c.name} style={{ maxHeight: (c.h || 32) + 'px', width: 'auto', objectFit: 'contain' }} />
+            </div>
           ))}
+        </div>
+      </Reveal>
+
+      {/* Parceiros e Investidores */}
+      <Reveal delay={300}>
+        <div className="text-sm font-semibold text-ink mb-5 mt-10">Parceiros e Investidores</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '24px 32px', alignItems: 'center', justifyItems: 'center' }}>
+          {[
+            { name: 'Exame', logo: 'assets/logos/exame.png', h: 22 },
+            { name: 'ScaleUp Endeavor', logo: 'assets/logos/scaleup-endeavor.png', h: 22 },
+            { name: 'Tegup Ventures', logo: 'assets/logos/tegup-ventures.png', h: 22 },
+            { name: 'Labs', logo: 'assets/logos/labs.png', h: 22 },
+            { name: 'Valor', logo: 'assets/logos/valor.png', h: 22 },
+            { name: 'Bradesco', logo: 'assets/logos/bradesco.png' },
+          ].map((c, i) => (
+            <div key={i} style={{ width: '100%', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <img src={c.logo} alt={c.name} style={{ maxHeight: (c.h || 32) + 'px', width: 'auto', objectFit: 'contain' }} />
+            </div>
+          ))}
+        </div>
+      </Reveal>
+
+      {/* Case Braspress */}
+      <Reveal delay={360}>
+        <div className="mt-12 rounded-2xl bg-stone-50 border border-stone-200/70 overflow-hidden">
+          <div className="grid lg:grid-cols-2 items-stretch">
+            <div className="p-6 md:p-8 flex flex-col justify-center">
+              {/* Eyebrow + logo */}
+              <div className="flex items-center gap-3 mb-3">
+                <div className="text-[11px] font-medium uppercase tracking-[0.1em] text-stone-400">Case de sucesso</div>
+                <img src="assets/logos/braspress.png" alt="Braspress" style={{ height: 42, width: 'auto', objectFit: 'contain' }} />
+              </div>
+              {/* Título principal */}
+              <h3 className="text-lg font-bold text-ink leading-snug mb-4">Como a Braspress ganhou controle total da frota</h3>
+              {/* Texto descritivo */}
+              <p className="text-sm text-subink leading-relaxed mb-2">
+                A Braspress, uma das maiores transportadoras de encomendas do Brasil, enfrentava desafios com a gestão de pátio e visibilidade da operação em tempo real. Com a Rabbot, a empresa digitalizou seus processos de checklist e manutenção, centralizou informações e ganhou controle total sobre a frota.
+              </p>
+              <p className="text-sm text-subink leading-relaxed mb-4">
+                O resultado: mais disponibilidade dos veículos, redução de custos com manutenções corretivas e uma operação que finalmente fala a mesma língua — do pátio à diretoria.
+              </p>
+              <p className="text-xs text-muted">Assista à demonstração ao lado e veja como a transformação aconteceu na prática.</p>
+            </div>
+            <div className="bg-black min-h-[280px] lg:min-h-0">
+              <video
+                className="w-full h-full object-cover"
+                controls
+                preload="metadata"
+              >
+                <source src="assets/demobraspress.mp4" type="video/mp4" />
+                Seu navegador não suporta vídeos HTML5.
+              </video>
+            </div>
+          </div>
         </div>
       </Reveal>
     </Section>

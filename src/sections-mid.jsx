@@ -62,18 +62,18 @@ function KanbanCard({ c }) {
 function KanbanBoard({ data, emptyLabel = 'Sem itens no período' }) {
   return (
     <div className="overflow-x-auto -mx-5 md:mx-0 px-5 md:px-0 pb-2">
-      <div className="flex gap-3" style={{ minWidth: 'max-content' }}>
+      <div className="flex gap-3 items-stretch" style={{ minWidth: 'max-content' }}>
         {data.cols.map((col) => (
-          <div key={col.key} className="shrink-0 w-[280px]">
-            <div className="bg-stone-50 border border-stone-200/70 rounded-xl overflow-hidden">
-              <div className="flex items-center justify-between px-3 py-2.5 bg-white border-b border-stone-200/70">
+          <div key={col.key} className="shrink-0 w-[280px] flex">
+            <div className="bg-stone-50 border border-stone-200/70 rounded-xl overflow-hidden flex flex-col w-full">
+              <div className="flex items-center justify-between px-3 py-2.5 bg-white border-b border-stone-200/70 shrink-0">
                 <div className="flex items-center gap-2 min-w-0">
                   <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${DOT_CLASSES[col.tone] || DOT_CLASSES.neutral}`} />
                   <span className="text-[13px] font-medium text-ink truncate">{col.title}</span>
                 </div>
                 <span className="text-xs text-muted font-mono tabular-nums shrink-0 ml-2">{col.count}</span>
               </div>
-              <div className="p-2 space-y-2 min-h-[220px]">
+              <div className="p-2 space-y-2 flex-1 overflow-y-auto" style={{ maxHeight: 480 }}>
                 {col.cards.length === 0 ? (
                   <div className="text-[11px] text-muted text-center py-6 italic">{emptyLabel}</div>
                 ) : (
@@ -83,6 +83,119 @@ function KanbanBoard({ data, emptyLabel = 'Sem itens no período' }) {
             </div>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+// ---------- Kanban de Ordens de Serviço ----------
+const OS_PRIORITY_BARS = {
+  facil:  { bars: [true, true, false], color: 'text-amber-400' },
+  medio: { bars: [true, true, true], color: 'text-amber-500' },
+};
+
+function OSCard({ c }) {
+  const prio = OS_PRIORITY_BARS[c.difficulty] || OS_PRIORITY_BARS.medio;
+  return (
+    <div className="bg-white border border-stone-200/70 rounded-lg p-3 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          {c.detailLink && <div className="text-[10px] text-amber-600 font-medium mb-0.5 flex items-center gap-1">🏷 Detalhar O.S</div>}
+          <div className="flex items-center gap-2">
+            <span className="text-[13px] font-bold text-ink">OS #{c.os}</span>
+            <span className="text-[11px] text-muted font-mono">| {c.plate}</span>
+          </div>
+        </div>
+        <IconWrench size={16} strokeWidth={1.5} className="text-stone-300 shrink-0 mt-0.5" />
+      </div>
+      {c.fleet && <div className="text-[11px] text-muted mt-0.5">{c.fleet}</div>}
+      <div className="mt-1.5 flex items-center gap-1 flex-wrap text-[10px] text-muted">
+        {c.departments.map((d, i) => (
+          <span key={i} className="flex items-center gap-0.5">
+            <IconUser size={9} strokeWidth={1.5} />{d}
+          </span>
+        ))}
+      </div>
+      <div className="mt-2 flex flex-wrap gap-1">
+        {c.tags.map((t, i) => (
+          <span key={i} className={`text-[10px] font-medium px-1.5 py-0.5 rounded border ${t.done ? 'bg-stone-50 text-stone-600 border-stone-200' : t.tone === 'brand' ? 'bg-brand-50 text-brand-700 border-brand-200' : 'bg-stone-100 text-stone-700 border-stone-200'}`}>
+            {t.label}{t.done ? ' ✓' : ''}
+          </span>
+        ))}
+      </div>
+      <div className="mt-2 flex items-center justify-between text-[10px] text-muted">
+        <div className="flex items-center gap-2">
+          <span className="flex items-end gap-px">
+            {prio.bars.map((on, i) => (
+              <span key={i} className={`w-[3px] rounded-sm ${on ? (c.difficulty === 'facil' ? 'bg-amber-400' : 'bg-orange-500') : 'bg-stone-200'}`} style={{ height: 4 + i * 3 }} />
+            ))}
+          </span>
+          <span className="capitalize">{c.difficulty === 'facil' ? 'Fácil' : 'Médio'}</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          {c.previsao && (
+            <span className="flex items-center gap-0.5">
+              <IconClock size={9} strokeWidth={1.5} />{c.previsao}
+            </span>
+          )}
+          {c.atraso && (
+            <span className="text-red-600 font-semibold">Atraso: {c.atraso}</span>
+          )}
+          {c.tempoAberto && (
+            <span className="flex items-center gap-0.5 text-stone-400">
+              <IconClock size={9} strokeWidth={1.5} />{c.tempoAberto}
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function OSKanbanBoard({ data }) {
+  return (
+    <div>
+      {/* Resumo por tipo */}
+      <div className="flex gap-3 mb-5 flex-wrap">
+        {data.resumo.map((r, i) => (
+          <div key={i} className="bg-white border border-stone-200/70 rounded-lg px-4 py-3 min-w-[140px]">
+            <div className="flex items-center gap-2 mb-2">
+              <span className={`w-2 h-2 rounded-full ${r.dotColor}`} />
+              <span className="text-sm font-semibold text-ink">{r.tipo}</span>
+            </div>
+            <div className="space-y-0.5 text-[11px]">
+              <div className="flex justify-between"><span className="text-muted">Aberta</span><span className="font-mono font-semibold text-ink">{r.aberta}</span></div>
+              <div className="flex justify-between"><span className="text-muted">Em Progresso</span><span className="font-mono font-semibold text-ink">{r.progresso}</span></div>
+              <div className="flex justify-between"><span className="text-muted">Concluída</span><span className="font-mono font-semibold text-ink">{r.concluida}</span></div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Colunas */}
+      <div className="overflow-x-auto -mx-5 md:mx-0 px-5 md:px-0 pb-2">
+        <div className="flex gap-3 items-stretch" style={{ minWidth: 'max-content' }}>
+          {data.cols.map((col) => (
+            <div key={col.key} className="shrink-0 w-[320px] flex">
+              <div className="bg-stone-50 border border-stone-200/70 rounded-xl overflow-hidden flex flex-col w-full">
+                <div className="flex items-center justify-between px-3 py-2.5 bg-white border-b border-stone-200/70 shrink-0">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="w-5 h-5 rounded border border-stone-200 shrink-0" />
+                    <span className="text-[14px] font-semibold text-ink">{col.title}</span>
+                  </div>
+                  <span className="text-base text-muted font-mono tabular-nums shrink-0 ml-2">{col.count}</span>
+                </div>
+                <div className="p-2 space-y-2 flex-1 overflow-y-auto" style={{ maxHeight: 520 }}>
+                  {col.cards.length === 0 ? (
+                    <div className="text-[11px] text-muted text-center py-6 italic">Nenhuma OS nesta etapa</div>
+                  ) : (
+                    col.cards.map((c, i) => <OSCard key={i} c={c} />)
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -191,17 +304,20 @@ function ChecklistsSection() {
     { key: 'checklists', label: 'Checklists preenchidos', count: 84, icon: <IconList size={14} strokeWidth={1.5} /> },
     { key: 'disp', label: 'Kanban de Disponibilidade', count: 163, icon: <IconLayout size={14} strokeWidth={1.5} /> },
     { key: 'manut', label: 'Kanban de Manutenção', count: 26, icon: <IconWrench size={14} strokeWidth={1.5} /> },
+    { key: 'os', label: 'Ordens de Serviço', count: 32, icon: <IconWrench size={14} strokeWidth={1.5} /> },
   ];
 
   const titleByView = {
     checklists: <span><span className="text-3xl font-semibold"><CountNumber value={84} /></span> checklists preenchidos</span>,
     disp: <span>Kanban de Disponibilidade <span className="text-muted font-normal">ao vivo</span></span>,
     manut: <span>Kanban de Manutenção <span className="text-muted font-normal">ao vivo</span></span>,
+    os: <span>Ordens de Serviço <span className="text-muted font-normal">ao vivo</span></span>,
   };
   const subtitleByView = {
     checklists: 'Entrada e saída de frota digitalizada desde o primeiro dia. Rastreabilidade ponta-a-ponta.',
     disp: 'Espelho do quadro de ativos na plataforma Rabbot — toda placa, todo status, atualizado ao vivo pela operação.',
     manut: 'Fluxo completo das ordens de manutenção — do apontamento à liberação com pendência.',
+    os: 'Gestão completa das ordens de serviço — abertura, execução e conclusão com rastreabilidade por departamento.',
   };
 
   return (
@@ -211,7 +327,7 @@ function ChecklistsSection() {
           <h2 className="text-2xl md:text-3xl font-semibold tracking-tight leading-[1.15] text-ink">{titleByView[view]}</h2>
           <p className="mt-2 text-sm text-subink max-w-2xl leading-relaxed">{subtitleByView[view]}</p>
         </div>
-        <a href="https://app.rabbot.co" target="_blank" rel="noopener noreferrer"
+        <a href="https://app-v3.rabbot.co/" target="_blank" rel="noopener noreferrer"
           className="shrink-0 inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
           Ir para plataforma
           <IconArrowRight size={14} strokeWidth={1.5} />
@@ -228,6 +344,8 @@ function ChecklistsSection() {
           ))}
         </div>
       </div>
+
+      <div className="mt-6" />
 
       {view === 'checklists' && (
         <Reveal>
@@ -251,6 +369,16 @@ function ChecklistsSection() {
           <div className="mt-3 text-[11px] text-muted flex items-center gap-2">
             <IconInfo size={12} strokeWidth={1.5} />
             Total no fluxo de manutenção: {KANBAN_MANUT.total} ordens · arraste para ver todas as colunas
+          </div>
+        </Reveal>
+      )}
+
+      {view === 'os' && (
+        <Reveal>
+          <OSKanbanBoard data={KANBAN_OS} />
+          <div className="mt-3 text-[11px] text-muted flex items-center gap-2">
+            <IconInfo size={12} strokeWidth={1.5} />
+            Total de ordens de serviço: {KANBAN_OS.total} OS · arraste para ver todas as colunas
           </div>
         </Reveal>
       )}
@@ -364,7 +492,7 @@ function AfterVisual({ kind }) {
 function AntesDepoisSection() {
   return (
     <Section id="antes-depois">
-      <SectionHeader title="O que mudou na sua operação" subtitle="Três processos-chave que saíram do improviso para um fluxo rastreável." />
+      <SectionHeader title="O que vai mudar na sua operação" subtitle="Três processos-chave que saíram do improviso para um fluxo rastreável." />
       <div className="grid md:grid-cols-3 gap-4">
         {BEFORE_AFTER.map((b, i) => (
           <Reveal key={i} delay={i * 80}>
@@ -429,14 +557,6 @@ function AntesDepoisSection() {
           </div>
           </div>
 
-          <div className="text-center py-8">
-            <p className="text-lg md:text-xl font-medium text-ink leading-snug tracking-tight max-w-2xl mx-auto">
-              "BTime é um sistema de apontamento.<br />Rabbot é uma operação que se autoajusta."
-            </p>
-            <p className="mt-3 text-sm text-muted">
-              Mesma origem (registro de evento), destinos diferentes (relatório vs ação).
-            </p>
-          </div>
         </div>
       </Reveal>
     </Section>

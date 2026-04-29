@@ -721,8 +721,220 @@ function AgentePorPlaca() {
   );
 }
 
+// ── Agent team data for organogram (by pilar) ──
+const AGENT_PILARES = [
+  {
+    key: 'D', label: 'Disponibilidade',
+    borderColor: 'border-brand-500/25', bgColor: 'bg-brand-500/[0.06]', labelColor: 'text-brand-500',
+    agents: [
+      { id: 'marco', name: 'Marco', role: 'Monitor de Disponibilidade', avatar: 'assets/agentes/avatar-marco.png' },
+    ],
+  },
+  {
+    key: 'M', label: 'Manutenção',
+    borderColor: 'border-blue-500/15', bgColor: 'bg-blue-500/[0.04]', labelColor: 'text-blue-300',
+    agents: [
+      { id: 'bia',   name: 'Bia',   role: 'Manut. Preventiva',  avatar: 'assets/agentes/avatar-bia.png' },
+      { id: 'vitor', name: 'Vitor', role: 'Auditor de Manut.',   avatar: 'assets/agentes/avatar-vitor.png' },
+      { id: 'leo',   name: 'Léo',   role: 'Corretiva Ext.',      avatar: 'assets/agentes/avatar-leo.png' },
+      { id: 'fred',  name: 'Fred',  role: 'Conciliação de NF',   avatar: 'assets/agentes/avatar-fred.png' },
+    ],
+  },
+  {
+    key: 'A', label: 'Aquisição',
+    borderColor: 'border-amber-500/15', bgColor: 'bg-amber-500/[0.04]', labelColor: 'text-amber-300',
+    agents: [
+      { id: 'nico', name: 'Nico', role: 'Gestor de Estoque',  avatar: 'assets/agentes/avatar-nico.png' },
+      { id: 'zeca', name: 'Zeca', role: 'Compras e Neg.',      avatar: 'assets/agentes/avatar-zeca.png' },
+      { id: 'bino', name: 'Bino', role: 'Aprov. de Orçam.',    avatar: 'assets/agentes/avatar-bino.png' },
+    ],
+  },
+  {
+    key: 'X', label: 'Cross D · M · A',
+    borderColor: 'border-rose-500/20', bgColor: 'bg-rose-500/[0.04]', labelColor: 'text-rose-300',
+    agents: [
+      { id: 'clara', name: 'Clara', role: 'Conformidade de Processo', avatar: 'assets/agentes/avatar-clara.png' },
+    ],
+  },
+];
+
+// Active agent IDs (agents already in operation)
+const ACTIVE_AGENTS = ['marco'];
+
+function AgentCard({ a, isHighlighted, showcase }) {
+  const isActive = ACTIVE_AGENTS.includes(a.id);
+
+  if (showcase) {
+    // In showcase mode: active agents full color, inactive ones dimmed + grayscale + dashed border
+    return (
+      <div className={`relative rounded-xl p-2.5 flex flex-col items-center text-center transition-all shrink-0 ${
+        isActive
+          ? 'bg-white/[0.08] border border-brand-500/30 shadow-[0_0_16px_rgba(16,185,129,0.12)]'
+          : 'bg-white/[0.03] border border-dashed border-white/10'
+      }`} style={{ width: 80 }}>
+        <div className={`w-11 h-11 rounded-full overflow-hidden mb-1.5 ${isActive ? 'ring-2 ring-brand-500 ring-offset-1 ring-offset-[#1c1917]' : ''}`}>
+          <img src={a.avatar} alt={a.name} className="w-full h-full object-cover" />
+        </div>
+        <div className="text-[11px] font-semibold leading-tight text-white">{a.name}</div>
+        <div className="text-[8px] leading-tight mt-0.5 text-stone-300">{a.role}</div>
+        {isActive && (
+          <div className="mt-1.5 text-[7px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-brand-500/20 text-white flex items-center gap-1">
+            <span className="w-1 h-1 rounded-full bg-brand-400" />Em operação
+          </div>
+        )}
+        {!isActive && (
+          <div className="mt-1.5 text-[7px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-white/5 text-stone-300 flex items-center gap-1">
+            <span className="w-1 h-1 rounded-full border border-stone-400" />Em construção
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className={`relative rounded-xl p-2.5 flex flex-col items-center text-center transition-all shrink-0 ${
+      isHighlighted
+        ? 'bg-white/[0.08] border border-brand-500/40 shadow-[0_0_24px_rgba(16,185,129,0.18)]'
+        : 'bg-white/[0.03] border border-white/5 opacity-40'
+    }`} style={{ width: 80 }}>
+      <div className={`relative w-11 h-11 rounded-full overflow-hidden mb-1.5 ${isHighlighted ? 'ring-2 ring-brand-500 ring-offset-2 ring-offset-[#1c1917]' : ''}`}>
+        <img src={a.avatar} alt={a.name} className="w-full h-full object-cover" />
+      </div>
+      <div className={`text-[11px] font-semibold leading-tight ${isHighlighted ? 'text-white' : 'text-stone-500'}`}>{a.name}</div>
+      <div className={`text-[8px] leading-tight mt-0.5 ${isHighlighted ? 'text-stone-400' : 'text-stone-600'}`}>{a.role}</div>
+      {isHighlighted && (
+        <div className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-brand-500 flex items-center justify-center">
+          <IconCheck size={10} strokeWidth={2.5} className="text-white" />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AgentTeamOrganogram({ highlightId, showcase }) {
+  return (
+    <div className="flex flex-col gap-3 w-full max-w-[420px]">
+      {AGENT_PILARES.map((pilar) => {
+        const activeCount = showcase ? pilar.agents.filter(a => ACTIVE_AGENTS.includes(a.id)).length : 0;
+        const totalCount = pilar.agents.length;
+        return (
+          <div key={pilar.key}
+            className={`rounded-xl border ${pilar.borderColor} ${pilar.bgColor} p-3`}>
+            <div className="flex items-center justify-between mb-3">
+              <div className={`text-[10px] font-bold uppercase tracking-[0.15em] ${pilar.labelColor}`}>
+                {pilar.key} · {pilar.label}
+              </div>
+              {showcase && (
+                <span className={`text-[8px] font-medium tabular-nums ${activeCount > 0 ? 'text-brand-500' : 'text-stone-500'}`}>
+                  {activeCount}/{totalCount} {totalCount === 1 ? 'ativo' : 'ativos'}
+                </span>
+              )}
+            </div>
+            <div className="flex gap-2 flex-wrap justify-center">
+              {pilar.agents.map((a) => (
+                <AgentCard key={a.id} a={a} isHighlighted={a.id === highlightId} showcase={showcase} />
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── Reusable Agent Cover (two-column layout) ──
+function AgenteCover({ eyebrow, title, titleAccent, subtitle, description, highlights, ctaLabel, onClickCta, secondaryCtaLabel, secondaryCtaHref, period, highlightAgent, onBack, backLabel, showcase, soloAgent }) {
+  return (
+    <div className="py-10 md:py-16">
+      {onBack && (
+        <Reveal>
+          <button onClick={onBack}
+            className="inline-flex items-center gap-1.5 text-sm text-stone-500 hover:text-white transition mb-8">
+            <IconChevLeft size={14} strokeWidth={1.5} />
+            {backLabel || 'Voltar'}
+          </button>
+        </Reveal>
+      )}
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center min-h-[60vh]">
+      {/* Left column — text content */}
+      <div className="flex flex-col">
+        <Reveal>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-500 mb-5">{eyebrow}</div>
+        </Reveal>
+        <Reveal delay={60}>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight leading-[1.1] text-white mb-4">
+            {title} <span className="text-brand-500">{titleAccent}</span>
+          </h2>
+        </Reveal>
+        <Reveal delay={120}>
+          <p className="text-base md:text-lg text-stone-300 leading-relaxed mb-6">{subtitle}</p>
+        </Reveal>
+        <Reveal delay={180}>
+          <p className="text-sm text-stone-400 leading-relaxed mb-8">{description}</p>
+        </Reveal>
+        <Reveal delay={240}>
+          <div className="space-y-3 mb-10">
+            {highlights.map((h, i) => (
+              <div key={i} className="flex items-start gap-3">
+                <span className="w-9 h-9 rounded-lg bg-brand-600/20 flex items-center justify-center text-brand-500 shrink-0 mt-0.5">{h.icon}</span>
+                <div>
+                  <div className="text-sm font-semibold text-white">{h.label}</div>
+                  <div className="text-xs text-stone-400 leading-relaxed">{h.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Reveal>
+        <Reveal delay={300}>
+          <div className="flex items-center gap-3 flex-wrap">
+            <button onClick={onClickCta}
+              className="inline-flex items-center gap-2.5 bg-brand-600 hover:bg-brand-700 text-white text-base font-semibold px-8 py-4 rounded-xl transition shadow-lg shadow-brand-600/25">
+              {ctaLabel}
+              <IconArrowRight size={18} strokeWidth={2} />
+            </button>
+            {secondaryCtaLabel && secondaryCtaHref && (
+              <a href={secondaryCtaHref} target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 border border-white/15 hover:border-white/30 text-white text-base font-medium px-8 py-4 rounded-xl transition hover:bg-white/5">
+                {secondaryCtaLabel}
+                <IconExternal size={16} strokeWidth={1.5} />
+              </a>
+            )}
+          </div>
+        </Reveal>
+        {period && (
+          <Reveal delay={360}>
+            <p className="mt-4 text-xs text-stone-600">{period}</p>
+          </Reveal>
+        )}
+      </div>
+
+      {/* Right column */}
+      <Reveal delay={200}>
+        <div className="flex items-center justify-center">
+          {soloAgent ? (
+            <div className="flex flex-col items-center text-center">
+              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden ring-4 ring-brand-500 ring-offset-4 ring-offset-[#1c1917] shadow-[0_0_40px_rgba(16,185,129,0.2)] mb-5">
+                <img src={soloAgent.avatar} alt={soloAgent.name} className="w-full h-full object-cover" />
+              </div>
+              <div className="text-2xl md:text-3xl font-semibold text-white mb-1">{soloAgent.name}</div>
+              <div className="text-sm text-stone-400">{soloAgent.role}</div>
+              <div className="mt-3 text-[10px] font-bold uppercase tracking-[0.15em] px-3 py-1 rounded-full bg-brand-500/25 border border-brand-500/40 text-white">
+                Pilar D · Disponibilidade
+              </div>
+            </div>
+          ) : (
+            <AgentTeamOrganogram highlightId={highlightAgent} showcase={showcase} />
+          )}
+        </div>
+      </Reveal>
+    </div>
+    </div>
+  );
+}
+
 // ── Main Agent Section ──
 function AgenteCTA() {
+  const [view, setView] = useStateE('team'); // 'team' | 'cover' | 'results'
   const [tab, setTab] = useStateE('visao');
   const tabs = [
     { key: 'visao', label: 'Visão Geral' },
@@ -730,35 +942,99 @@ function AgenteCTA() {
     { key: 'placa', label: 'Por Placa' },
   ];
 
+  const scrollToTop = () => {
+    const el = document.getElementById('agente');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const goTo = (v) => { setView(v); scrollToTop(); };
+
   return (
     <section id="agente" className="scroll-mt-20 px-5 md:px-8 py-12 md:py-16" style={{ backgroundColor: '#1c1917' }}>
       <div className="max-w-6xl mx-auto">
-        <div className="mb-8 flex flex-col md:flex-row items-start justify-between gap-4">
+
+        {/* Nível 1 — Capa institucional do Time Rabbot */}
+        {view === 'team' && (
+          <AgenteCover
+            eyebrow="Time Rabbot · Em construção"
+            title="Estamos construindo o time que vai"
+            titleAccent="rodar sua operação inteira."
+            subtitle="9 agentes de IA, 3 pilares, 1 operação coordenada. O primeiro agente já está em campo. Os próximos vêm aí."
+            description="O Time Rabbot é a nossa visão para gestão de frota: 9 agentes especialistas organizados em 3 pilares — Disponibilidade, Manutenção e Aquisição — mais 1 agente cross de conformidade. Quando completo, vai cobrir as 6 jornadas da frota 24/7, equivalendo a 9 FTEs por uma fração do custo. Estamos construindo esse time agente por agente, em parceria com nossos clientes. Hoje, o Agente de Disponibilidade já está em operação na Rodojacto, entregando resultado real."
+            highlights={[
+              { label: '1 já em campo', desc: 'Agente de Disponibilidade, em operação na Rodojacto', icon: <IconCheck size={18} strokeWidth={1.5} /> },
+              { label: '8 em construção', desc: 'Manutenção, Aquisição e Cross no roadmap ativo', icon: <IconWrench size={18} strokeWidth={1.5} /> },
+              { label: 'Construído com clientes', desc: 'Cada agente nasce de uma operação real', icon: <IconUsers size={18} strokeWidth={1.5} /> },
+            ]}
+            ctaLabel="Conhecer o agente que já está em operação"
+            onClickCta={() => goTo('cover')}
+            showcase
+          />
+        )}
+
+        {/* Nível 2 — Capa do Agente de Disponibilidade */}
+        {view === 'cover' && (
+          <AgenteCover
+            eyebrow="Agente 1 · Disponibilidade"
+            title="Agente de"
+            titleAccent="Disponibilidade"
+            subtitle="Monitora as macros da frota em tempo real e aciona motorista, gestores e torre de controle no WhatsApp quando algum processo atrasa."
+            description="Cada minuto que um veículo fica parado além do esperado é receita perdida. O Agente de Disponibilidade acompanha as macros de todos os caminhões 24/7 e, no momento em que um processo passa do tempo previsto, aciona automaticamente os envolvidos: motorista no WhatsApp, gestores e torre de controle — antes que o atraso vire prejuízo."
+            highlights={[
+              { label: 'Lê as macros em tempo real', desc: 'Acompanha cada caminhão da frota 24/7', icon: <IconChart size={18} strokeWidth={1.5} /> },
+              { label: 'Detecta atrasos nos processos', desc: 'Identifica quando algo passa do tempo previsto', icon: <IconAlert size={18} strokeWidth={1.5} /> },
+              { label: 'Aciona quem precisa agir', desc: 'Motorista no WhatsApp, gestores e torre de controle', icon: <IconMessage size={18} strokeWidth={1.5} /> },
+            ]}
+            ctaLabel="Ver resultados"
+            onClickCta={() => goTo('results')}
+            secondaryCtaLabel="Ver agente"
+            secondaryCtaHref="https://rabbot-agent-rodojacto.lovable.app/"
+            period="Período do teste: 12/03/2026 a 05/04/2026 · Rodojacto"
+            onBack={() => goTo('team')}
+            backLabel="Voltar para Time Rabbot"
+            soloAgent={{ name: 'Marco', role: 'Monitor de Disponibilidade', avatar: 'assets/agentes/avatar-marco.png' }}
+          />
+        )}
+
+        {/* Nível 3 — Resultados */}
+        {view === 'results' && (
           <div>
-            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight leading-[1.15] text-white">
-              Agente de <span className="text-brand-500">Disponibilidade</span>
-            </h2>
-            <p className="mt-2 text-sm text-stone-400">12/03/2026 a 05/04/2026 · Rodojacto</p>
+            <div className="mb-8">
+              <button onClick={() => goTo('cover')}
+                className="inline-flex items-center gap-1.5 text-sm text-stone-500 hover:text-white transition mb-6">
+                <IconChevLeft size={14} strokeWidth={1.5} />
+                Sobre o agente
+              </button>
+              <div className="flex flex-col md:flex-row items-start justify-between gap-4">
+                <div>
+                  <h2 className="text-2xl md:text-3xl font-semibold tracking-tight leading-[1.15] text-white">
+                    Agente de <span className="text-brand-500">Disponibilidade</span>
+                  </h2>
+                  <p className="mt-2 text-sm text-stone-400">12/03/2026 a 05/04/2026 · Rodojacto</p>
+                </div>
+                <a href="https://rabbot-agent-rodojacto.lovable.app/" target="_blank" rel="noopener noreferrer"
+                  className="shrink-0 inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
+                  Abrir Agente
+                  <IconArrowRight size={14} strokeWidth={1.5} />
+                </a>
+              </div>
+            </div>
+
+            <div className="flex border-b border-white/10 mb-8 overflow-x-auto no-scrollbar">
+              {tabs.map((t) => (
+                <button key={t.key} onClick={() => setTab(t.key)}
+                  className={`px-5 py-2.5 text-sm font-medium transition border-b-2 -mb-px whitespace-nowrap ${tab === t.key ? 'border-brand-500 text-white' : 'border-transparent text-stone-500 hover:text-stone-300'}`}>
+                  {t.label}
+                </button>
+              ))}
+            </div>
+
+            {tab === 'visao' && <AgenteVisaoGeral />}
+            {tab === 'macro' && <AgentePorMacro />}
+            {tab === 'placa' && <AgentePorPlaca />}
           </div>
-          <a href="https://rabbot-agent-rodojacto.lovable.app/" target="_blank" rel="noopener noreferrer"
-            className="shrink-0 inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
-            Abrir Agente
-            <IconArrowRight size={14} strokeWidth={1.5} />
-          </a>
-        </div>
+        )}
 
-        <div className="flex border-b border-white/10 mb-8 overflow-x-auto no-scrollbar">
-          {tabs.map((t) => (
-            <button key={t.key} onClick={() => setTab(t.key)}
-              className={`px-5 py-2.5 text-sm font-medium transition border-b-2 -mb-px whitespace-nowrap ${tab === t.key ? 'border-brand-500 text-white' : 'border-transparent text-stone-500 hover:text-stone-300'}`}>
-              {t.label}
-            </button>
-          ))}
-        </div>
-
-        {tab === 'visao' && <AgenteVisaoGeral />}
-        {tab === 'macro' && <AgentePorMacro />}
-        {tab === 'placa' && <AgentePorPlaca />}
       </div>
     </section>
   );

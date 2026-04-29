@@ -9,24 +9,27 @@ const CLIENT = {
   responsavelRole: 'Customer Success Rabbot',
   periodStart: '14/04/2026',
   periodEnd: '28/04/2026',
-  blitzDate: '14/04/2026',
-  participantes: 6,
+  blitzDate: '22/04/2026',
+  participantes: 3,
 };
 
 const TEAM = [
-  { name: 'Marcos Brasil', role: 'Processos · Qualidade' },
-  { name: 'Wilson Tavares', role: 'Ger. Manutenção' },
-  { name: 'Carla Mendes', role: 'Operações' },
-  { name: 'Douglas Ramos', role: 'Líder Pátio' },
-  { name: 'Gustavo Carlino', role: 'Rabbot · CS' },
-  { name: 'Ana Prado', role: 'Rabbot · Implantação' },
+  { name: 'Marcio T', role: 'Ger. Operacional' },
+  { name: 'Alessandro Trinca', role: 'Ger. Manutenção' },
+  { name: 'Fábio Tadal', role: 'Ger. Torre de Controle' },
+  { name: 'Marcos Garcia', role: 'Compras' },
+  { name: 'Marcos Brasil', role: 'Ger. Processos e Inovação' },
+  { name: 'Marcos Aukar', role: 'Diretor Geral Rodojacto' },
 ];
 
 const TIMELINE = [
-  { label: 'Manhã', time: '08h30', desc: 'Kick-off, tour pelo pátio e mapeamento de dores.' },
-  { label: 'Almoço', time: '12h00', desc: 'Alinhamento com liderança e definição de KPIs.' },
-  { label: 'Tarde', time: '14h00', desc: 'Workshop: checklists, OS e fluxo atual.' },
-  { label: 'Encerramento', time: '17h30', desc: 'Plano de POV, responsáveis e próximos passos.' },
+  { label: 'Briefing', time: '08h00', desc: 'Briefing com Marcos Brasil e alinhamento do dia.' },
+  { label: 'Manutenção', time: '09h00', desc: 'Apresentação do time de manutenção.' },
+  { label: 'Inspeção', time: '09h30', desc: 'Inspeção de pátio e manutenção até 12h.' },
+  { label: 'Almoço', time: '12h00', desc: 'Pausa para almoço.' },
+  { label: 'Preparação', time: '13h00', desc: 'Preparação da apresentação com dados coletados.' },
+  { label: 'Reunião Aukar', time: '14h30', desc: 'Reunião com Marcos Aukar, Diretor Geral.' },
+  { label: 'Apresentação', time: '15h30', desc: 'Apresentação para o restante do time até 17h.' },
 ];
 
 const DIAG = [
@@ -37,10 +40,10 @@ const DIAG = [
 ];
 
 const PHASES = [
-  { key: 'reativo', title: 'Reativo', sub: 'Fase 0', pct: 60, desc: 'Apaga incêndios. Sem padrão. Decisões por memória.' },
-  { key: 'adaptativo', title: 'Adaptativo', sub: 'Fase 1', pct: 25, desc: 'Processos existem, mas vivem em planilhas e pessoas.' },
-  { key: 'proativo', title: 'Proativo', sub: 'Fase 2', pct: 10, desc: 'Dados centralizados. Ação antes do problema escalar.' },
-  { key: 'preditivo', title: 'Preditivo', sub: 'Fase 3', pct: 5, desc: 'Modelos antecipam falhas. Operação orquestrada por sinais.' },
+  { key: 'reativo', title: 'Modelo Reativo', sub: 'Fase 0', pct: 60, desc: 'Processos 100% analógicos, checklists de papel, telefone e e-mails, sem controle de processos nem visibilidade da operação.' },
+  { key: 'adaptativo', title: 'Modelo Adaptativo', sub: 'Fase 1', pct: 25, desc: 'Controles de processos feitos por checklists de papel e planilhas de Excel alimentadas de forma manual.' },
+  { key: 'proativo', title: 'Modelo Proativo', sub: 'Fase 2', pct: 10, desc: 'Controles de processos feitos em ERPs e/ou outros sistemas, com dados coletados manual/digitalmente e visibilidade em tempo real, com baixo grau de automação.' },
+  { key: 'preditivo', title: 'Modelo Preditivo', sub: 'Fase 3', pct: 5, desc: 'Integração das informações de checklists digitais e sistemas, garantindo visão 360° da operação e atualizações em tempo real, com alto grau de automação, incluindo decisões automatizadas.' },
 ];
 
 // 84 checklists — generate grid sample
@@ -153,6 +156,81 @@ const KANBAN_MANUT = {
   total: 26,
 };
 
+// Kanban — Ordens de Serviço
+const KANBAN_OS = {
+  resumo: [
+    { tipo: 'Elétrica', dotColor: 'bg-amber-400', aberta: 3, progresso: 0, concluida: 0 },
+    { tipo: 'Borracharia', dotColor: 'bg-stone-800', aberta: 9, progresso: 3, concluida: 1 },
+    { tipo: 'Mecânica', dotColor: 'bg-blue-500', aberta: 10, progresso: 6, concluida: 1 },
+  ],
+  cols: [
+    {
+      key: 'aberta', title: 'Aberta', count: 21,
+      cards: [
+        {
+          os: '121', plate: 'GEK3632', fleet: '5843',
+          departments: ['Manutenção', 'Borracharia', 'Mecânica'],
+          tags: [{ label: 'Borracharia' }, { label: 'Mecânica', tone: 'brand' }],
+          difficulty: 'medio', tempoAberto: '7d em aberto', detailLink: true,
+        },
+        {
+          os: '137', plate: 'TES4321',
+          departments: ['Manutenção', 'Borracharia'],
+          tags: [{ label: 'Borracharia' }],
+          difficulty: 'facil', tempoAberto: '6d em aberto', detailLink: true,
+        },
+        {
+          os: '107', plate: 'CLJ9637', fleet: '4681',
+          departments: ['Manutenção', 'Mecânica'],
+          tags: [{ label: 'Mecânica', tone: 'brand' }],
+          difficulty: 'medio', tempoAberto: '7d em aberto', detailLink: true,
+        },
+      ],
+    },
+    {
+      key: 'progresso', title: 'Em Progresso', count: 9,
+      cards: [
+        {
+          os: '135', plate: 'NKT6507', fleet: '6259',
+          departments: ['Manutenção', 'Mecânica'],
+          tags: [{ label: 'Mecânica', tone: 'brand' }],
+          difficulty: 'facil', previsao: 'Previsto: 2h', atraso: '+6d (#135.1)',
+        },
+        {
+          os: '136', plate: 'FYS4755', fleet: '5905',
+          departments: ['Manutenção', 'Borracharia'],
+          tags: [{ label: 'Borracharia' }],
+          difficulty: 'medio', previsao: 'Previsto: 6h', atraso: '+6d (#136.1)',
+        },
+        {
+          os: '117', plate: 'FCF3551', fleet: '6016',
+          departments: ['Manutenção', 'Mecânica', 'Mazza'],
+          tags: [{ label: 'Mecânica', tone: 'brand' }],
+          difficulty: 'medio', previsao: 'Previsto: 2h', atraso: '+6d (#117.3)',
+        },
+      ],
+    },
+    {
+      key: 'concluida', title: 'Concluída', count: 2,
+      cards: [
+        {
+          os: '131', plate: 'CLJ9631', fleet: '4678',
+          departments: ['Manutenção', 'Mecânica', 'Carlino'],
+          tags: [{ label: 'Mecânica', done: true }],
+          difficulty: 'medio', tempoAberto: '7d em aberto',
+        },
+        {
+          os: '138', plate: 'RDJ1234', fleet: '1234',
+          departments: ['Manutenção', 'Borracharia', 'Mazza'],
+          tags: [{ label: 'Borracharia', done: true }],
+          difficulty: 'facil', tempoAberto: '6d em aberto',
+        },
+      ],
+    },
+  ],
+  total: 32,
+};
+
 // Antes x Depois
 const BEFORE_AFTER = [
   {
@@ -219,5 +297,5 @@ const ENTREGAS = [
 
 Object.assign(window, {
   CLIENT, TEAM, TIMELINE, DIAG, PHASES, CHECKLIST_SAMPLE, CHECKLIST_WEEKLY,
-  KANBAN_DISP, KANBAN_MANUT, BEFORE_AFTER, projectarFrota, MILESTONES, ENTREGAS,
+  KANBAN_DISP, KANBAN_MANUT, KANBAN_OS, BEFORE_AFTER, projectarFrota, MILESTONES, ENTREGAS,
 });
