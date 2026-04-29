@@ -660,7 +660,7 @@ function SobreSection() {
                 controls
                 preload="metadata"
               >
-                <source src="assets/demobraspress.mp4" type="video/mp4" />
+                <source src="assets/braspressvideo.mp4" type="video/mp4" />
                 Seu navegador não suporta vídeos HTML5.
               </video>
             </div>

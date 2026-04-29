@@ -1,5 +1,5 @@
 // Checklists + Kanbans (Disponibilidade e Manutenção) com tabs + Antes x Depois
-const { useState: useStateM, useMemo: useMemoM } = React;
+const { useState: useStateM, useMemo: useMemoM, useEffect: useEffectM } = React;
 
 // ---------- Kanban card (espelho da plataforma Rabbot) ----------
 const TAG_CLASSES = {
@@ -24,14 +24,29 @@ const DOT_CLASSES = {
 };
 
 function KanbanCard({ c }) {
+  const tagStyle = c.tagColor ? (() => {
+    const { r, g, b } = hexToRgb(c.tagColor);
+    return {
+      backgroundColor: `rgba(${r}, ${g}, ${b}, 0.15)`,
+      color: darkenHex(c.tagColor, 0.45),
+      border: `1px solid rgba(${r}, ${g}, ${b}, 0.3)`,
+    };
+  })() : null;
+
   return (
     <div className="bg-white border border-stone-200/70 rounded-lg p-2.5 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
       <div className="flex items-start justify-between gap-2">
         <span className="placa text-[13px] font-semibold text-ink whitespace-nowrap">{c.plate}</span>
         {c.tag && (
-          <span className={`text-[9px] font-medium uppercase tracking-wide px-1.5 py-0.5 rounded whitespace-nowrap ${TAG_CLASSES[c.tagTone] || TAG_CLASSES.neutral}`}>
-            {c.tag}
-          </span>
+          tagStyle ? (
+            <span className="text-[9px] font-medium uppercase tracking-wide px-1.5 py-0.5 rounded-full whitespace-nowrap" style={tagStyle}>
+              {c.tag}
+            </span>
+          ) : (
+            <span className={`text-[9px] font-medium uppercase tracking-wide px-1.5 py-0.5 rounded-full whitespace-nowrap ${TAG_CLASSES[c.tagTone] || TAG_CLASSES.neutral}`}>
+              {c.tag}
+            </span>
+          )
         )}
       </div>
       {c.sub && <div className="mt-1 text-[11px] text-subink leading-snug truncate">{c.sub}</div>}
@@ -62,18 +77,18 @@ function KanbanCard({ c }) {
 function KanbanBoard({ data, emptyLabel = 'Sem itens no período' }) {
   return (
     <div className="overflow-x-auto -mx-5 md:mx-0 px-5 md:px-0 pb-2">
-      <div className="flex gap-3 items-stretch" style={{ minWidth: 'max-content' }}>
+      <div className="flex gap-3" style={{ minWidth: 'max-content' }}>
         {data.cols.map((col) => (
-          <div key={col.key} className="shrink-0 w-[280px] flex">
-            <div className="bg-stone-50 border border-stone-200/70 rounded-xl overflow-hidden flex flex-col w-full">
-              <div className="flex items-center justify-between px-3 py-2.5 bg-white border-b border-stone-200/70 shrink-0">
+          <div key={col.key} className="shrink-0 w-[280px]">
+            <div className="bg-stone-50 border border-stone-200/70 rounded-xl overflow-hidden">
+              <div className="flex items-center justify-between px-3 py-2.5 bg-white border-b border-stone-200/70">
                 <div className="flex items-center gap-2 min-w-0">
                   <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${DOT_CLASSES[col.tone] || DOT_CLASSES.neutral}`} />
                   <span className="text-[13px] font-medium text-ink truncate">{col.title}</span>
                 </div>
                 <span className="text-xs text-muted font-mono tabular-nums shrink-0 ml-2">{col.count}</span>
               </div>
-              <div className="p-2 space-y-2 flex-1 overflow-y-auto" style={{ maxHeight: 480 }}>
+              <div className="p-2 space-y-2 overflow-y-auto" style={{ height: 420 }}>
                 {col.cards.length === 0 ? (
                   <div className="text-[11px] text-muted text-center py-6 italic">{emptyLabel}</div>
                 ) : (
@@ -88,104 +103,103 @@ function KanbanBoard({ data, emptyLabel = 'Sem itens no período' }) {
   );
 }
 
-// ---------- Kanban de Ordens de Serviço ----------
-const OS_PRIORITY_BARS = {
-  facil:  { bars: [true, true, false], color: 'text-amber-400' },
-  medio: { bars: [true, true, true], color: 'text-amber-500' },
+// ---------- OS Card ----------
+const AREA_COLORS = {
+  brand: 'bg-brand-50 text-brand-700 border border-brand-200',
+  amber: 'bg-amber-50 text-amber-700 border border-amber-200',
+  neutral: 'bg-stone-100 text-stone-600 border border-stone-200',
 };
+const AREA_DOT = { brand: 'bg-brand-500', amber: 'bg-amber-500', neutral: 'bg-stone-400' };
+const BAR_COLORS_OS = ['bg-amber-400', 'bg-orange-500', 'bg-red-500'];
 
 function OSCard({ c }) {
-  const prio = OS_PRIORITY_BARS[c.difficulty] || OS_PRIORITY_BARS.medio;
+  const areaStyle = c.areaColor ? (() => {
+    const { r, g, b } = hexToRgb(c.areaColor);
+    return {
+      backgroundColor: `rgba(${r}, ${g}, ${b}, 0.15)`,
+      color: darkenHex(c.areaColor, 0.45),
+      border: `1px solid rgba(${r}, ${g}, ${b}, 0.3)`,
+    };
+  })() : null;
+
   return (
     <div className="bg-white border border-stone-200/70 rounded-lg p-3 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          {c.detailLink && <div className="text-[10px] text-amber-600 font-medium mb-0.5 flex items-center gap-1">🏷 Detalhar O.S</div>}
-          <div className="flex items-center gap-2">
-            <span className="text-[13px] font-bold text-ink">OS #{c.os}</span>
-            <span className="text-[11px] text-muted font-mono">| {c.plate}</span>
-          </div>
-        </div>
-        <IconWrench size={16} strokeWidth={1.5} className="text-stone-300 shrink-0 mt-0.5" />
-      </div>
-      {c.fleet && <div className="text-[11px] text-muted mt-0.5">{c.fleet}</div>}
-      <div className="mt-1.5 flex items-center gap-1 flex-wrap text-[10px] text-muted">
-        {c.departments.map((d, i) => (
-          <span key={i} className="flex items-center gap-0.5">
-            <IconUser size={9} strokeWidth={1.5} />{d}
-          </span>
-        ))}
-      </div>
-      <div className="mt-2 flex flex-wrap gap-1">
-        {c.tags.map((t, i) => (
-          <span key={i} className={`text-[10px] font-medium px-1.5 py-0.5 rounded border ${t.done ? 'bg-stone-50 text-stone-600 border-stone-200' : t.tone === 'brand' ? 'bg-brand-50 text-brand-700 border-brand-200' : 'bg-stone-100 text-stone-700 border-stone-200'}`}>
-            {t.label}{t.done ? ' ✓' : ''}
-          </span>
-        ))}
-      </div>
-      <div className="mt-2 flex items-center justify-between text-[10px] text-muted">
+      <div className="flex items-start justify-between gap-2 mb-1.5">
         <div className="flex items-center gap-2">
-          <span className="flex items-end gap-px">
-            {prio.bars.map((on, i) => (
-              <span key={i} className={`w-[3px] rounded-sm ${on ? (c.difficulty === 'facil' ? 'bg-amber-400' : 'bg-orange-500') : 'bg-stone-200'}`} style={{ height: 4 + i * 3 }} />
-            ))}
+          <span className="placa text-[14px] font-bold text-ink whitespace-nowrap">OS {c.os}</span>
+          <span className="text-[11px] text-muted font-mono">{c.plate}</span>
+        </div>
+        <IconWrench size={14} strokeWidth={1.5} className="text-stone-300 shrink-0" />
+      </div>
+      {c.sub && <div className="text-[11px] text-subink mb-1.5">{c.sub}</div>}
+      <div className="flex items-center gap-2 text-[11px] text-muted mb-2">
+        <span className="flex items-center gap-1"><IconUser size={10} strokeWidth={1.5} />{c.setor}</span>
+        {c.resp && <span className="flex items-center gap-1"><IconUsers size={10} strokeWidth={1.5} />{c.resp}</span>}
+      </div>
+      <div className="flex items-center gap-2 flex-wrap mb-2">
+        {areaStyle ? (
+          <span className="text-[10px] font-medium px-2 py-0.5 rounded-full" style={areaStyle}>
+            {c.area}{c.done ? ' ✓' : ''}
           </span>
-          <span className="capitalize">{c.difficulty === 'facil' ? 'Fácil' : 'Médio'}</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          {c.previsao && (
-            <span className="flex items-center gap-0.5">
-              <IconClock size={9} strokeWidth={1.5} />{c.previsao}
+        ) : (
+          <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${AREA_COLORS[c.areaTone] || AREA_COLORS.neutral}`}>
+            {c.area}{c.done ? ' ✓' : ''}
+          </span>
+        )}
+        {c.complexBars > 0 && (
+          <span className="flex items-center gap-1.5">
+            <span className="flex items-end gap-px">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <span key={i} className={`w-[3px] rounded-sm ${i < c.complexBars ? BAR_COLORS_OS[Math.min(i, 2)] : 'bg-stone-200'}`} style={{ height: 4 + i * 3 }} />
+              ))}
             </span>
-          )}
-          {c.atraso && (
-            <span className="text-red-600 font-semibold">Atraso: {c.atraso}</span>
-          )}
-          {c.tempoAberto && (
-            <span className="flex items-center gap-0.5 text-stone-400">
-              <IconClock size={9} strokeWidth={1.5} />{c.tempoAberto}
-            </span>
-          )}
-        </div>
+            {c.complex && <span className="text-[10px] text-muted">{c.complex}</span>}
+          </span>
+        )}
+      </div>
+      <div className="flex items-center gap-2 text-[10px] text-muted">
+        {c.tempo && <span className="flex items-center gap-1"><IconClock size={10} strokeWidth={1.5} />{c.tempo}</span>}
+        {c.previsto && <span className="flex items-center gap-1"><IconClock size={10} strokeWidth={1.5} />Previsto: {c.previsto}</span>}
+        {c.atraso && <span className="text-red-600 font-semibold">Atraso: {c.atraso}</span>}
       </div>
     </div>
   );
 }
 
-function OSKanbanBoard({ data }) {
+function OSKanbanBoard({ data, summary }) {
   return (
     <div>
-      {/* Resumo por tipo */}
-      <div className="flex gap-3 mb-5 flex-wrap">
-        {data.resumo.map((r, i) => (
-          <div key={i} className="bg-white border border-stone-200/70 rounded-lg px-4 py-3 min-w-[140px]">
-            <div className="flex items-center gap-2 mb-2">
-              <span className={`w-2 h-2 rounded-full ${r.dotColor}`} />
-              <span className="text-sm font-semibold text-ink">{r.tipo}</span>
+      {/* Summary cards */}
+      {summary.length > 0 && (
+        <div className="flex gap-3 mb-6 overflow-x-auto no-scrollbar">
+          {summary.map((s, i) => (
+            <div key={i} className="shrink-0 border border-stone-200/70 rounded-xl px-5 py-3 bg-white" style={{ minWidth: 160 }}>
+              <div className="flex items-center gap-2 mb-2">
+                <span className={`w-2 h-2 rounded-full ${AREA_DOT[s.tone] || AREA_DOT.neutral}`} />
+                <span className="text-sm font-semibold text-ink">{s.area}</span>
+              </div>
+              <div className="space-y-0.5 text-[12px] text-subink tabular-nums">
+                <div className="flex justify-between"><span>Aberta</span><span className="font-semibold text-ink">{s.aberta}</span></div>
+                <div className="flex justify-between"><span>Em Progresso</span><span className="font-semibold text-ink">{s.progresso}</span></div>
+                <div className="flex justify-between"><span>Concluída</span><span className="font-semibold text-ink">{s.concluida}</span></div>
+              </div>
             </div>
-            <div className="space-y-0.5 text-[11px]">
-              <div className="flex justify-between"><span className="text-muted">Aberta</span><span className="font-mono font-semibold text-ink">{r.aberta}</span></div>
-              <div className="flex justify-between"><span className="text-muted">Em Progresso</span><span className="font-mono font-semibold text-ink">{r.progresso}</span></div>
-              <div className="flex justify-between"><span className="text-muted">Concluída</span><span className="font-mono font-semibold text-ink">{r.concluida}</span></div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Colunas */}
+          ))}
+        </div>
+      )}
+      {/* Kanban columns */}
       <div className="overflow-x-auto -mx-5 md:mx-0 px-5 md:px-0 pb-2">
-        <div className="flex gap-3 items-stretch" style={{ minWidth: 'max-content' }}>
+        <div className="flex gap-3" style={{ minWidth: 'max-content' }}>
           {data.cols.map((col) => (
-            <div key={col.key} className="shrink-0 w-[320px] flex">
-              <div className="bg-stone-50 border border-stone-200/70 rounded-xl overflow-hidden flex flex-col w-full">
-                <div className="flex items-center justify-between px-3 py-2.5 bg-white border-b border-stone-200/70 shrink-0">
+            <div key={col.key} className="shrink-0 w-[320px]">
+              <div className="bg-stone-50 border border-stone-200/70 rounded-xl overflow-hidden">
+                <div className="flex items-center justify-between px-3 py-2.5 bg-white border-b border-stone-200/70">
                   <div className="flex items-center gap-2 min-w-0">
-                    <span className="w-5 h-5 rounded border border-stone-200 shrink-0" />
-                    <span className="text-[14px] font-semibold text-ink">{col.title}</span>
+                    <span className="text-[13px] font-semibold text-ink truncate">{col.title}</span>
                   </div>
-                  <span className="text-base text-muted font-mono tabular-nums shrink-0 ml-2">{col.count}</span>
+                  <span className="text-xs text-muted font-mono tabular-nums shrink-0 ml-2">{col.count}</span>
                 </div>
-                <div className="p-2 space-y-2 flex-1 overflow-y-auto" style={{ maxHeight: 520 }}>
+                <div className="p-2 space-y-2 overflow-y-auto" style={{ height: 420 }}>
                   {col.cards.length === 0 ? (
                     <div className="text-[11px] text-muted text-center py-6 italic">Nenhuma OS nesta etapa</div>
                   ) : (
@@ -201,11 +215,152 @@ function OSKanbanBoard({ data }) {
   );
 }
 
+// ---------- Modal de respostas do checklist ----------
+function ChecklistModal({ item, onClose }) {
+  const [galleryIdx, setGalleryIdx] = useStateM(0);
+  const [failedPhotos, setFailedPhotos] = useStateM({});
+  if (!item) return null;
+
+  const allPhotos = (item.photos || []).filter((_, i) => !failedPhotos[i]);
+  const onImgError = (originalIdx) => setFailedPhotos(prev => ({ ...prev, [originalIdx]: true }));
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={onClose}>
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto mx-4" onClick={e => e.stopPropagation()}>
+        {/* Header */}
+        <div className="sticky top-0 bg-white border-b border-stone-200/70 px-6 py-4 flex items-start justify-between gap-4 z-10">
+          <div>
+            <div className="flex items-center gap-3 mb-1">
+              <span className="placa text-lg font-bold text-ink">{item.plate}</span>
+              <span className="text-stone-300">|</span>
+              <span className="text-sm text-subink">{item.type}</span>
+            </div>
+            <div className="flex items-center gap-4 text-xs text-muted">
+              <span>Data de conclusão: <span className="text-ink">{item.when}</span></span>
+              <span>Responsável: <span className="text-ink">{item.who}</span></span>
+            </div>
+          </div>
+          <button onClick={onClose} className="shrink-0 w-8 h-8 rounded-full hover:bg-stone-100 flex items-center justify-center transition text-stone-400 hover:text-ink">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+
+        <div className="flex flex-col md:flex-row">
+          {/* Respostas */}
+          <div className="flex-1 px-6 py-5 min-w-0">
+            <h3 className="text-base font-semibold text-ink mb-4">Respostas</h3>
+            <div className="space-y-3">
+              {item.questions.map((q, i) => (
+                <div key={i} className="border border-stone-200/70 rounded-xl px-4 py-3 flex gap-3">
+                  <span className="shrink-0 w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center text-xs font-semibold text-subink">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <div className="min-w-0">
+                    <div className="text-sm font-medium text-ink mb-0.5">{q.title}</div>
+                    {q.answer && <div className="text-sm text-subink">{q.answer}</div>}
+                    {q.type === 'CATEGORYAPPOINTMENT' && (q.categoryAppointments || []).map((ca, ci) => (
+                      <div key={ci} className="mt-2">
+                        <span className="text-xs font-medium text-muted">{ca.categoryReference?.name}</span>
+                        <div className="mt-1 space-y-1">
+                          {ca.items.map((ap, ai) => (
+                            <div key={ai} className="flex items-start gap-2 text-xs">
+                              <span className={`shrink-0 mt-0.5 w-3 h-3 rounded-full border-2 ${ap.isOk ? 'border-brand-500 bg-brand-50' : 'border-red-400 bg-red-50'}`} />
+                              <div>
+                                <span className="text-ink">{ap.name}</span>
+                                {ap.descriptionProblem && <span className="text-muted ml-1">— {ap.descriptionProblem}</span>}
+                                {ap.photo && ap.photo.startsWith('http') && (
+                                  <img src={ap.photo} alt={ap.name} className="mt-1 rounded-lg max-h-32 object-cover" onError={e => { e.target.style.display = 'none'; }} />
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Sidebar: endereço + galeria */}
+          <div className="w-full md:w-80 shrink-0 border-t md:border-t-0 md:border-l border-stone-200/70 px-6 py-5 bg-stone-50/50">
+            {item.address && (
+              <div className="mb-4">
+                <div className="text-sm font-medium text-ink mb-2">{item.address}</div>
+                {item.lat && item.lng && (
+                  <a href={`https://www.google.com/maps?q=${item.lat},${item.lng}`} target="_blank" rel="noopener noreferrer"
+                    className="block rounded-xl overflow-hidden border border-stone-200/70 relative" style={{ height: 120 }}>
+                    <svg className="w-full h-full" viewBox="0 0 400 120" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+                      <rect width="400" height="120" fill="#e8e4df"/>
+                      <rect x="40" y="0" width="8" height="120" fill="#f5f3f0" rx="1"/>
+                      <rect x="120" y="0" width="12" height="120" fill="#f5f3f0" rx="1"/>
+                      <rect x="200" y="0" width="6" height="120" fill="#f5f3f0" rx="1"/>
+                      <rect x="280" y="0" width="10" height="120" fill="#f5f3f0" rx="1"/>
+                      <rect x="350" y="0" width="7" height="120" fill="#f5f3f0" rx="1"/>
+                      <rect x="0" y="20" width="400" height="8" fill="#f5f3f0" rx="1"/>
+                      <rect x="0" y="55" width="400" height="12" fill="#f5f3f0" rx="1"/>
+                      <rect x="0" y="95" width="400" height="6" fill="#f5f3f0" rx="1"/>
+                      <rect x="80" y="30" width="30" height="20" fill="#d6d3d0" rx="2" opacity="0.5"/>
+                      <rect x="150" y="75" width="40" height="15" fill="#d6d3d0" rx="2" opacity="0.5"/>
+                      <rect x="250" y="25" width="20" height="25" fill="#d6d3d0" rx="2" opacity="0.5"/>
+                      <rect x="310" y="70" width="25" height="20" fill="#d6d3d0" rx="2" opacity="0.5"/>
+                      <path d="M170 8 Q180 2 190 10 Q195 5 200 12 L200 18 Q190 12 185 16 Q178 10 170 18 Z" fill="#c8dfc0" opacity="0.6"/>
+                      <path d="M60 80 Q68 72 76 82 Q82 75 88 84 L88 92 Q80 84 74 88 Q68 80 60 90 Z" fill="#c8dfc0" opacity="0.5"/>
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-[13px] font-medium text-stone-500 drop-shadow-sm">clique para carregar o mapa</span>
+                    </div>
+                  </a>
+                )}
+              </div>
+            )}
+
+            {allPhotos.length > 0 && (
+              <div>
+                <h4 className="text-sm font-semibold text-ink mb-3">Galeria</h4>
+                {/* Main image */}
+                <div className="rounded-xl overflow-hidden border border-stone-200/70 mb-3 relative bg-stone-100">
+                  <img src={allPhotos[galleryIdx]} alt="Foto" className="w-full aspect-[4/3] object-cover" onError={e => { e.target.style.display = 'none'; }} />
+                  {allPhotos.length > 1 && (
+                    <>
+                      <button onClick={() => setGalleryIdx((galleryIdx - 1 + allPhotos.length) % allPhotos.length)}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition">
+                        <IconChevLeft size={14} strokeWidth={2} />
+                      </button>
+                      <button onClick={() => setGalleryIdx((galleryIdx + 1) % allPhotos.length)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition">
+                        <IconChevRight size={14} strokeWidth={2} />
+                      </button>
+                    </>
+                  )}
+                </div>
+                {/* Thumbnails */}
+                {allPhotos.length > 1 && (
+                  <div className="flex gap-2 overflow-x-auto no-scrollbar">
+                    {allPhotos.map((src, j) => (
+                      <button key={j} onClick={() => setGalleryIdx(j)}
+                        className={`shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition ${j === galleryIdx ? 'border-brand-500' : 'border-stone-200/70 opacity-60 hover:opacity-100'}`}>
+                        <img src={src} alt="" className="w-full h-full object-cover" onError={e => { e.target.parentElement.style.display = 'none'; }} />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ---------- Carrossel de checklists ----------
-function ChecklistCarousel() {
+function ChecklistCarousel({ items }) {
   const scrollRef = React.useRef(null);
   const [canPrev, setCanPrev] = useStateM(false);
   const [canNext, setCanNext] = useStateM(true);
+  const [modalItem, setModalItem] = useStateM(null);
 
   const updateButtons = () => {
     const el = scrollRef.current;
@@ -230,6 +385,10 @@ function ChecklistCarousel() {
 
   return (
     <div className="relative">
+      {modalItem && ReactDOM.createPortal(
+        <ChecklistModal item={modalItem} onClose={() => setModalItem(null)} />,
+        document.body
+      )}
       {/* Setas */}
       {canPrev && (
         <button onClick={() => scroll(-1)}
@@ -246,13 +405,13 @@ function ChecklistCarousel() {
 
       <div ref={scrollRef} className="overflow-x-auto no-scrollbar pt-1 pb-2">
         <div className="flex gap-4" style={{ minWidth: 'max-content' }}>
-          {CHECKLIST_SAMPLE.map((c, i) => (
-            <div key={i} className="bg-white border border-stone-200/70 rounded-xl overflow-hidden card-hover shrink-0" style={{ width: 300 }}>
-              <div className="p-5">
+          {items.map((c, i) => (
+            <div key={i} className="bg-white border border-stone-200/70 rounded-xl overflow-hidden card-hover shrink-0 flex flex-col" style={{ width: 300 }}>
+              <div className="p-5 flex-1">
                 {/* Header: placa + tipo */}
                 <div className="flex items-start justify-between gap-3 mb-4">
                   <span className="placa text-xl font-bold text-ink tracking-tight">{c.plate}</span>
-                  <span className="text-[11px] text-muted whitespace-nowrap mt-1">Checklist de<br />{c.type}</span>
+                  <span className="text-[11px] text-muted whitespace-nowrap mt-1">{c.type}</span>
                 </div>
 
                 {/* Data de conclusão */}
@@ -270,21 +429,29 @@ function ChecklistCarousel() {
                 {/* 3 fotos quadradas */}
                 <div className="grid grid-cols-3 gap-2 mb-3">
                   {[0, 1, 2].map((j) => (
-                    <div key={j} className="ph-stripe rounded-lg relative" style={{ aspectRatio: '1/1' }}>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <IconCamera size={14} strokeWidth={1.5} className="text-stone-400" />
-                      </div>
+                    <div key={j} className="rounded-lg relative overflow-hidden bg-stone-100" style={{ aspectRatio: '1/1' }}>
+                      {c.photos && c.photos[j] ? (
+                        <img src={c.photos[j]} alt="" className="w-full h-full object-cover" onError={e => { e.target.parentElement.style.display = 'none'; }} />
+                      ) : (
+                        <div className="ph-stripe w-full h-full flex items-center justify-center">
+                          <IconCamera size={14} strokeWidth={1.5} className="text-stone-400" />
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
 
                 {/* Local */}
-                <div className="text-xs text-muted flex items-center gap-1 mb-4">
-                  <IconMapPin size={12} strokeWidth={1.5} />{c.place}
-                </div>
+                {c.place && (
+                  <div className="text-xs text-muted flex items-center gap-1">
+                    <IconMapPin size={12} strokeWidth={1.5} />{c.place}
+                  </div>
+                )}
+              </div>
 
-                {/* Botão */}
-                <button className="w-full py-2 border border-stone-200/70 rounded-lg text-xs font-medium text-ink hover:bg-stone-50 transition flex items-center justify-center gap-1.5">
+              {/* Botão fixo no bottom */}
+              <div className="px-5 pb-5">
+                <button onClick={() => setModalItem(c)} className="w-full py-2 border border-stone-200/70 rounded-lg text-xs font-medium text-ink hover:bg-stone-50 transition flex items-center justify-center gap-1.5">
                   Ver respostas <IconArrowRight size={12} strokeWidth={1.5} />
                 </button>
               </div>
@@ -299,16 +466,44 @@ function ChecklistCarousel() {
 // ---------- Seção principal com 3 tabs ----------
 function ChecklistsSection() {
   const [view, setView] = useStateM('checklists');
+  const [checklists, setChecklists] = useStateM(CHECKLIST_FALLBACK);
+  const [loadingChecklist, setLoadingChecklist] = useStateM(true);
+  const [kanbanDisp, setKanbanDisp] = useStateM(KANBAN_DISP_FALLBACK);
+  const [kanbanManut, setKanbanManut] = useStateM(KANBAN_MANUT_FALLBACK);
+  const [kanbanOS, setKanbanOS] = useStateM(KANBAN_OS_FALLBACK);
+  const [osSummary, setOsSummary] = useStateM(OS_SUMMARY_FALLBACK);
+  const [loadingDisp, setLoadingDisp] = useStateM(true);
+  const [loadingManut, setLoadingManut] = useStateM(true);
+  const [loadingOS, setLoadingOS] = useStateM(true);
+
+  useEffectM(() => {
+    fetchChecklists()
+      .then(data => setChecklists(data))
+      .catch(err => console.error('Falha ao carregar Checklists:', err))
+      .finally(() => setLoadingChecklist(false));
+    fetchKanbanDisp()
+      .then(data => setKanbanDisp(data))
+      .catch(err => console.error('Falha ao carregar Kanban Disponibilidade:', err))
+      .finally(() => setLoadingDisp(false));
+    fetchKanbanManut()
+      .then(data => setKanbanManut(data))
+      .catch(err => console.error('Falha ao carregar Kanban Manutenção:', err))
+      .finally(() => setLoadingManut(false));
+    fetchKanbanOS()
+      .then(({ kanban, summary }) => { setKanbanOS(kanban); setOsSummary(summary); })
+      .catch(err => console.error('Falha ao carregar Ordens de Serviço:', err))
+      .finally(() => setLoadingOS(false));
+  }, []);
 
   const tabs = [
-    { key: 'checklists', label: 'Checklists preenchidos', count: 84, icon: <IconList size={14} strokeWidth={1.5} /> },
-    { key: 'disp', label: 'Kanban de Disponibilidade', count: 163, icon: <IconLayout size={14} strokeWidth={1.5} /> },
-    { key: 'manut', label: 'Kanban de Manutenção', count: 26, icon: <IconWrench size={14} strokeWidth={1.5} /> },
-    { key: 'os', label: 'Ordens de Serviço', count: 32, icon: <IconWrench size={14} strokeWidth={1.5} /> },
+    { key: 'checklists', label: 'Checklists preenchidos', count: checklists.total, icon: <IconList size={14} strokeWidth={1.5} /> },
+    { key: 'disp', label: 'Kanban de Disponibilidade', count: kanbanDisp.total, icon: <IconLayout size={14} strokeWidth={1.5} /> },
+    { key: 'manut', label: 'Kanban de Manutenção', count: kanbanManut.total, icon: <IconWrench size={14} strokeWidth={1.5} /> },
+    { key: 'os', label: 'Ordens de Serviço', count: kanbanOS.total, icon: <IconWrench size={14} strokeWidth={1.5} /> },
   ];
 
   const titleByView = {
-    checklists: <span><span className="text-3xl font-semibold"><CountNumber value={84} /></span> checklists preenchidos</span>,
+    checklists: <span><span className="text-3xl font-semibold"><CountNumber value={checklists.total} /></span> checklists preenchidos</span>,
     disp: <span>Kanban de Disponibilidade <span className="text-muted font-normal">ao vivo</span></span>,
     manut: <span>Kanban de Manutenção <span className="text-muted font-normal">ao vivo</span></span>,
     os: <span>Ordens de Serviço <span className="text-muted font-normal">ao vivo</span></span>,
@@ -317,7 +512,7 @@ function ChecklistsSection() {
     checklists: 'Entrada e saída de frota digitalizada desde o primeiro dia. Rastreabilidade ponta-a-ponta.',
     disp: 'Espelho do quadro de ativos na plataforma Rabbot — toda placa, todo status, atualizado ao vivo pela operação.',
     manut: 'Fluxo completo das ordens de manutenção — do apontamento à liberação com pendência.',
-    os: 'Gestão completa das ordens de serviço — abertura, execução e conclusão com rastreabilidade por departamento.',
+    os: 'Visão completa das ordens de serviço — por área, status e complexidade.',
   };
 
   return (
@@ -345,41 +540,61 @@ function ChecklistsSection() {
         </div>
       </div>
 
-      <div className="mt-6" />
-
       {view === 'checklists' && (
         <Reveal>
-          <ChecklistCarousel />
+          {loadingChecklist ? (
+            <div className="mt-10 text-center py-12 text-muted text-sm">Carregando checklists...</div>
+          ) : (
+            <div className="mt-10"><ChecklistCarousel items={checklists.sample} /></div>
+          )}
         </Reveal>
       )}
 
       {view === 'disp' && (
         <Reveal>
-          <KanbanBoard data={KANBAN_DISP} />
-          <div className="mt-3 text-[11px] text-muted flex items-center gap-2">
-            <IconInfo size={12} strokeWidth={1.5} />
-            Total rastreado: {KANBAN_DISP.total} ativos · arraste para ver todas as colunas
-          </div>
+          {loadingDisp ? (
+            <div className="mt-10 text-center py-12 text-muted text-sm">Carregando dados de disponibilidade...</div>
+          ) : (
+            <>
+              <div className="mt-10"><KanbanBoard data={kanbanDisp} /></div>
+              <div className="mt-3 text-[11px] text-muted flex items-center gap-2">
+                <IconInfo size={12} strokeWidth={1.5} />
+                Total rastreado: {kanbanDisp.total} ativos · arraste para ver todas as colunas
+              </div>
+            </>
+          )}
         </Reveal>
       )}
 
       {view === 'manut' && (
         <Reveal>
-          <KanbanBoard data={KANBAN_MANUT} emptyLabel="Nenhuma ordem nesta etapa" />
-          <div className="mt-3 text-[11px] text-muted flex items-center gap-2">
-            <IconInfo size={12} strokeWidth={1.5} />
-            Total no fluxo de manutenção: {KANBAN_MANUT.total} ordens · arraste para ver todas as colunas
-          </div>
+          {loadingManut ? (
+            <div className="mt-10 text-center py-12 text-muted text-sm">Carregando dados de manutenção...</div>
+          ) : (
+            <>
+              <div className="mt-10"><KanbanBoard data={kanbanManut} emptyLabel="Nenhum card nessa etapa" /></div>
+              <div className="mt-3 text-[11px] text-muted flex items-center gap-2">
+                <IconInfo size={12} strokeWidth={1.5} />
+                Total no fluxo de manutenção: {kanbanManut.total} ordens · arraste para ver todas as colunas
+              </div>
+            </>
+          )}
         </Reveal>
       )}
 
       {view === 'os' && (
         <Reveal>
-          <OSKanbanBoard data={KANBAN_OS} />
-          <div className="mt-3 text-[11px] text-muted flex items-center gap-2">
-            <IconInfo size={12} strokeWidth={1.5} />
-            Total de ordens de serviço: {KANBAN_OS.total} OS · arraste para ver todas as colunas
-          </div>
+          {loadingOS ? (
+            <div className="mt-10 text-center py-12 text-muted text-sm">Carregando ordens de serviço...</div>
+          ) : (
+            <>
+              <div className="mt-10"><OSKanbanBoard data={kanbanOS} summary={osSummary} /></div>
+              <div className="mt-3 text-[11px] text-muted flex items-center gap-2">
+                <IconInfo size={12} strokeWidth={1.5} />
+                Total de ordens: {kanbanOS.total} · arraste para ver todas as colunas
+              </div>
+            </>
+          )}
         </Reveal>
       )}
     </Section>

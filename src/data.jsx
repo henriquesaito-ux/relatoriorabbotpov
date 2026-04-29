@@ -46,190 +46,197 @@ const PHASES = [
   { key: 'preditivo', title: 'Modelo Preditivo', sub: 'Fase 3', pct: 5, desc: 'Integração das informações de checklists digitais e sistemas, garantindo visão 360° da operação e atualizações em tempo real, com alto grau de automação, incluindo decisões automatizadas.' },
 ];
 
-// 84 checklists — generate grid sample
-const CHECKLIST_SAMPLE = [
-  { code: 'F0C5F58', type: 'Entrada', when: '14/04 · 08h47', who: 'Douglas Ramos', plate: 'RBT-4A21', place: 'Pátio Oriente' },
-  { code: 'F0C5F73', type: 'Saída', when: '14/04 · 10h12', who: 'Julia Sato', plate: 'RBT-8C04', place: 'Pátio Oriente' },
-  { code: 'F0C60A1', type: 'Entrada', when: '15/04 · 06h33', who: 'Paulo Neves', plate: 'RBT-2E99', place: 'Filial Garça' },
-  { code: 'F0C6211', type: 'Entrada', when: '16/04 · 07h58', who: 'Douglas Ramos', plate: 'RBT-9F47', place: 'Pátio Oriente' },
-  { code: 'F0C62F8', type: 'Saída', when: '17/04 · 14h01', who: 'Julia Sato', plate: 'RBT-3B12', place: 'Pátio Oriente' },
-  { code: 'F0C63D2', type: 'Entrada', when: '18/04 · 09h21', who: 'Marcos Lira', plate: 'RBT-5D77', place: 'Filial Garça' },
+// ── Checklists API integration ──
+function formatChecklistDate(isoDate) {
+  const d = new Date(isoDate);
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const hours = String(d.getHours()).padStart(2, '0');
+  const mins = String(d.getMinutes()).padStart(2, '0');
+  return `${day}/${month} · ${hours}h${mins}`;
+}
+
+function extractChecklistImages(questions) {
+  const imgs = [];
+  (questions || []).forEach(q => {
+    (q.categoryAppointments || []).forEach(ca => {
+      (ca.items || []).forEach(ci => {
+        if (ci.photo && ci.photo.startsWith('http')) imgs.push(ci.photo);
+      });
+    });
+  });
+  return imgs;
+}
+
+function transformChecklistItem(item) {
+  const photos = extractChecklistImages(item.questions);
+  return {
+    code: item.id,
+    type: item.form?.title || '',
+    when: formatChecklistDate(item.submittedDate),
+    who: item.user?.name || '',
+    plate: item.asset?.identification || '',
+    place: [item.address?.city, item.address?.state].filter(Boolean).join(' — ') || '',
+    address: [item.address?.street, item.address?.city, item.address?.state].filter(Boolean).join(', '),
+    photos,
+    questions: (item.questions || []).filter(q => q.type !== 'SIGNATURE'),
+    lat: item.address?.geolocation?.latitude,
+    lng: item.address?.geolocation?.longitude,
+  };
+}
+
+function buildChecklistWeekly(items) {
+  const weeks = {};
+  items.forEach(item => {
+    const d = new Date(item.submittedDate);
+    const weekNum = Math.ceil(d.getDate() / 7);
+    const key = `Sem ${weekNum}`;
+    weeks[key] = (weeks[key] || 0) + 1;
+  });
+  return Object.entries(weeks)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([week, n]) => ({ week, n }));
+}
+
+async function fetchChecklists() {
+  const now = new Date();
+  const endDate = String(now.getDate()).padStart(2, '0') + '/' + String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear();
+  const res = await fetch('https://api-v3.rabbot.co/v1/saas/formsAnswer/search', {
+    method: 'POST',
+    headers: RABBOT_HEADERS,
+    body: JSON.stringify({
+      query: [
+        { fieldName: 'saveDate', operator: 'GREATER_THAN_OR_EQUAL_TO', values: ['30/03/2026'] },
+        { fieldName: 'saveDate', operator: 'LESS_THAN_OR_EQUAL_TO', values: [endDate] },
+      ],
+      sorting: [{ fieldName: 'saveDate', order: 'DESCENDING' }],
+      pagination: { pageNumber: 1, pageSize: 1000 },
+    }),
+  });
+  if (!res.ok) throw new Error('Checklists API error: ' + res.status);
+  const data = await res.json();
+  const items = data.items || [];
+  return {
+    total: items.length,
+    sample: items.map(transformChecklistItem),
+    weekly: buildChecklistWeekly(items),
+  };
+}
+
+const CHECKLIST_FALLBACK = { total: 0, sample: [], weekly: [] };
+
+// ── Kanban API integration ──
+const RABBOT_API = 'https://api-v3.rabbot.co/v1/agentic/process/board';
+const RABBOT_HEADERS = {
+  'Content-Type': 'application/json',
+  'Tenant-Id': '69cc049f95346de3a4e3d935',
+  'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiIzMjQ4NmZlYi0zNDBlLTQ2MjMtYjc2Ny1iNDhiNjg0NzQ5ZjIiLCJUZW5hbnRzIjoiW10iLCJDdXJyZW50VGVuYW50SWQiOiI2NmNmMzVkMWQ0NzEzNDkwZDg5MzYyM2IiLCJQcm9maWxlIjoiU3VwZXJBZG1pbmlzdHJhdG9yIiwiVXNlcklkTGVnYWN5IjoiMCIsIlVzZXJEZXNjcmlwdGlvbiI6IiIsIm5hbWVpZCI6InJvb3RAcmFiYm90LmNvIiwidW5pcXVlX25hbWUiOiJSb290IFJhYmJvdCIsImVtYWlsIjoicm9vdEByYWJib3QuY28iLCJqdGkiOiJkZDIzMzMyNS0yMzU4LTQwODQtYjQwMS1jMmY4ZmUxOTBmYjYiLCJNZW51cyI6IltdIiwiU2V0dGluZ3MiOiJbXSIsIkJvYXJkQWNjZXNLaW5kIjoiMSIsIm5iZiI6MTc3Njg1MDA0OCwiZXhwIjoxODA3OTY4NDQ4LCJpYXQiOjE3NzY4NjQ0NDgsImlzcyI6Imh0dHBzOi8vYXV0aC5yYWJib3QuY28iLCJhdWQiOiJodHRwczovL2F1dGgucmFiYm90LmNvIn0.-eNdMP1GXYkHnF6PDNYupF_agUnbj0rbpDwrjRrknBM',
+};
+const RABBOT_PAYLOAD = {
+  deliveryDate: null, members: [], processTime: null, slaColumn: null,
+  sorting: 'DeliveryDate', sortingOrder: 'ASCENDING', tags: [], columns: [],
+  updates: null, pagination: { pageNumber: 1, pageSize: 1000 },
+};
+
+const BOARD_ID_DISP = '69d7b56f580bb0ae4c682e42';
+const BOARD_ID_MANUT = '69d8dc085c0617ed4a478e33';
+
+// Column order & tone mapping for each board
+const DISP_COLUMNS = [
+  { key: 'disponivel', title: 'Disponível', tone: 'brand' },
+  { key: 'rota', title: 'Em Rota', tone: 'purple' },
+  { key: 'indisp', title: 'Indisponível', tone: 'pink' },
+  { key: 'espera', title: 'Espera Operacional', tone: 'amber' },
+  { key: 'manut', title: 'Manutenção', tone: 'brown' },
 ];
 
-const CHECKLIST_WEEKLY = [
-  { week: 'Sem 1', n: 22 }, { week: 'Sem 2', n: 28 }, { week: 'Sem 3', n: 18 }, { week: 'Sem 4', n: 16 },
+const MANUT_COLUMNS = [
+  { key: 'problemas', title: 'Problemas Apontados', tone: 'neutral' },
+  { key: 'aguardando', title: 'Ag. Manutenção', tone: 'brown' },
+  { key: 'iniciada', title: 'Manutenção Iniciada', tone: 'brown' },
+  { key: 'final', title: 'Finalizada', tone: 'neutral' },
+  { key: 'pendencia', title: 'Liberado com Pendência', tone: 'orange' },
 ];
 
-// Kanban — Disponibilidade
-const KANBAN_DISP = {
-  cols: [
-    {
-      key: 'disponivel', title: 'Disponível', count: 68, tone: 'brand',
-      cards: [
-        { plate: 'HNP3I88', tag: 'FIM DE VIA...', tagTone: 'brand', time: '5h02', parked: '6d', stripes: 1 },
-        { plate: 'CLJ9554', tag: 'FIM DE VIA...', tagTone: 'brand', time: '15h32', parked: '4d', stripes: 1 },
-        { plate: 'EVO6A62', tag: 'FIM DE VIA...', tagTone: 'brand', time: '1d', parked: '6d', stripes: 1 },
-        { plate: 'BXC4F77', tag: 'FIM DE VIA...', tagTone: 'brand', time: '1d', parked: '6d', stripes: 1 },
-        { plate: 'DAJ8F69', tag: 'FIM DE VIA...', tagTone: 'brand', time: '1d', parked: '6d', stripes: 1 },
-      ],
-    },
-    {
-      key: 'rota', title: 'Em Rota', count: 46, tone: 'purple',
-      cards: [
-        { plate: 'CLJ9710', tag: 'REINICIO D...', tagTone: 'purple', time: '1h', parked: '2d', stripes: 1 },
-        { plate: 'MKI6E90', tag: 'REINICIO D...', tagTone: 'purple', time: '9h32', parked: '6d', stripes: 1 },
-        { plate: 'EJY1G84', tag: 'REINICIO D...', tagTone: 'purple', time: '16h31', parked: '1d', stripes: 1 },
-        { plate: 'FOK6909', sub: '6021', tag: 'REINICIO D...', tagTone: 'purple', time: '1d', parked: '2d', stripes: 2 },
-        { plate: 'FBW0992', sub: 'Baú 3 eixos Distanciados (Trava)', tag: 'Em Rota', tagTone: 'blueLight', time: '1d', parked: '2d', stripes: 3 },
-      ],
-    },
-    {
-      key: 'indisp', title: 'Indisponível', count: 21, tone: 'pink',
-      cards: [
-        { plate: 'CLJ9613', sub: 'Sider 2 eixos – Bitrem', tag: 'Carregado', tagTone: 'pink', time: '1d', parked: '2d', stripes: 1 },
-        { plate: 'TJE4H15', sub: 'Baú 3 eixos – (Trava) – MARONI', tag: 'Carregado', tagTone: 'pink', time: '1d', parked: '2d', stripes: 2 },
-        { plate: 'CLJ9482', sub: 'Sider 3 eixos Distanciado – Assoalho de Madeira', tag: 'Carregado', tagTone: 'pink', time: '1d', parked: '2d', stripes: 1 },
-        { plate: 'CLJ9531', sub: 'Sider 3 eixos Distanciado – Modificada', tag: 'Carregado', tagTone: 'pink', time: '1d', parked: '2d', stripes: 1 },
-        { plate: 'CLJ9635', sub: 'Sider 2 eixos – Bitrem', tag: 'Carregado', tagTone: 'pink', time: '1d', parked: '2d', stripes: 3 },
-      ],
-    },
-    {
-      key: 'espera', title: 'Espera Operacional', count: 6, tone: 'amber',
-      cards: [
-        { plate: 'FJX2F65', tag: 'PARADA EV...', tagTone: 'amber', time: '1min', parked: '1d', stripes: 1 },
-        { plate: 'CLJ9F80', tag: 'PARADA EV...', tagTone: 'amber', time: '1min', parked: '1d', stripes: 1 },
-        { plate: 'FIM1H96', tag: 'PARADA EV...', tagTone: 'amber', time: '1min', parked: '1d', stripes: 1 },
-        { plate: 'BWC9590', tag: 'PARADA EV...', tagTone: 'amber', time: '2h01', parked: '1d', stripes: 1 },
-        { plate: 'JBR5I80', tag: 'PARADA EV...', tagTone: 'amber', time: '7h32', parked: '1d', stripes: 1 },
-      ],
-    },
-    {
-      key: 'problemas', title: 'Problemas Apontados', count: 0, tone: 'neutral', cards: [],
-    },
-    {
-      key: 'manut', title: 'Manutenção', count: 22, tone: 'brown',
-      cards: [
-        { plate: 'GEK3632', sub: 'Baú 3 eixos Distanciados (Trava)', tag: 'Manutenção', tagTone: 'brown', time: '1d', parked: '2d', stripes: 1, alert: '22/04 16:20' },
-        { plate: 'CLJ9505', sub: 'Carga Seca 3 eixos Extensível', tag: 'Manutenção', tagTone: 'brown', time: '1d', parked: '2d', stripes: 1 },
-        { plate: 'CLJ9456', sub: 'Sider 3 eixos Distanciado – Assoalho de Chapa', tag: 'Manutenção', tagTone: 'brown', time: '1d', parked: '2d', stripes: 1 },
-        { plate: 'CLJ9539', sub: 'Baú 3 eixos', tag: 'Manutenção', tagTone: 'brown', time: '1d', parked: '2d', stripes: 1 },
-        { plate: 'DHL5B96', tag: 'Manutenção', tagTone: 'brown', time: '1d', parked: '2d', stripes: 1 },
-      ],
-    },
-  ],
-  total: 163,
-};
+function formatElapsed(ms) {
+  const mins = Math.floor(ms / 60000);
+  if (mins < 1) return '<1min';
+  if (mins < 60) return mins + 'min';
+  const hours = Math.floor(mins / 60);
+  const remMins = mins % 60;
+  if (hours < 24) return remMins > 0 ? hours + 'h' + String(remMins).padStart(2, '0') : hours + 'h';
+  const days = Math.floor(hours / 24);
+  return days + 'd';
+}
 
-// Kanban — Manutenção
-const KANBAN_MANUT = {
-  cols: [
-    { key: 'problemas', title: 'Problemas Apontados', count: 0, tone: 'neutral', cards: [] },
-    {
-      key: 'aguardando', title: 'Ag. Manutenção', count: 15, tone: 'brown',
-      cards: [
-        { plate: 'CLJ9505', sub: 'Carga Seca 3 eixos Extensível', tag: 'Corretiva', tagTone: 'brown', time: '2d', parked: '2d', stripes: 1 },
-        { plate: 'CLJ9456', sub: 'Sider 3 eixos Distanciado – Assoalho de Chapa', tag: 'Corretiva', tagTone: 'brown', time: '2d', parked: '2d', stripes: 1 },
-        { plate: 'CLJ9539', sub: 'Baú 3 eixos', tag: 'Corretiva', tagTone: 'brown', time: '2d', parked: '2d', stripes: 1 },
-        { plate: 'GEK3632', sub: 'Baú 3 eixos Distanciados (Trava)', tag: 'Corretiva', tagTone: 'brown', time: '2d', parked: '2d', stripes: 1 },
-        { plate: 'FQO3A68', sub: 'Prancha Dupla – 3 eixos – RODOMOURA', tag: 'Corretiva', tagTone: 'brown', time: '2d', parked: '2d', stripes: 1 },
-      ],
-    },
-    {
-      key: 'iniciada', title: 'Manutenção Iniciada', count: 9, tone: 'brown',
-      cards: [
-        { plate: 'FOK6909', sub: '6021', tag: 'Corretiva', tagTone: 'brown', time: '2d', parked: '2d', stripes: 2 },
-        { plate: 'DHL5B96', tag: 'Corretiva', tagTone: 'brown', time: '2d', parked: '2d', stripes: 1 },
-        { plate: 'FYS4755', sub: '5905', tag: 'Corretiva', tagTone: 'brown', time: '2d', parked: '2d', stripes: 1 },
-        { plate: 'NKT6507', sub: 'Baú 3 eixos Distanciados (TETO DE METAL)', tag: 'Corretiva', tagTone: 'brown', time: '2d', parked: '2d', stripes: 1 },
-        { plate: 'NKT6337', sub: 'Baú 3 eixos Distanciados (TETO DE METAL)', tag: 'Corretiva', tagTone: 'brown', time: '2d', parked: '2d', stripes: 1 },
-      ],
-    },
-    { key: 'final', title: 'Finalizada', count: 0, tone: 'neutral', cards: [] },
-    {
-      key: 'pendencia', title: 'Liberado com Pendência', count: 2, tone: 'orange',
-      cards: [
-        { plate: 'RDJI234', sub: '1234', tag: 'Liberado co...', tagTone: 'orange', time: '1d', parked: '1d', stripes: 2 },
-        { plate: 'CLJ9631', sub: 'Sider 2 eixos – Bitrem', tag: 'Liberado co...', tagTone: 'orange', time: '1d', parked: '2d', stripes: 2 },
-      ],
-    },
-  ],
-  total: 26,
-};
+function hexToRgb(hex) {
+  const h = hex.replace('#', '');
+  const bigint = parseInt(h.length === 3 ? h.split('').map(c => c + c).join('') : h, 16);
+  return { r: (bigint >> 16) & 255, g: (bigint >> 8) & 255, b: bigint & 255 };
+}
 
-// Kanban — Ordens de Serviço
-const KANBAN_OS = {
-  resumo: [
-    { tipo: 'Elétrica', dotColor: 'bg-amber-400', aberta: 3, progresso: 0, concluida: 0 },
-    { tipo: 'Borracharia', dotColor: 'bg-stone-800', aberta: 9, progresso: 3, concluida: 1 },
-    { tipo: 'Mecânica', dotColor: 'bg-blue-500', aberta: 10, progresso: 6, concluida: 1 },
-  ],
-  cols: [
-    {
-      key: 'aberta', title: 'Aberta', count: 21,
-      cards: [
-        {
-          os: '121', plate: 'GEK3632', fleet: '5843',
-          departments: ['Manutenção', 'Borracharia', 'Mecânica'],
-          tags: [{ label: 'Borracharia' }, { label: 'Mecânica', tone: 'brand' }],
-          difficulty: 'medio', tempoAberto: '7d em aberto', detailLink: true,
-        },
-        {
-          os: '137', plate: 'TES4321',
-          departments: ['Manutenção', 'Borracharia'],
-          tags: [{ label: 'Borracharia' }],
-          difficulty: 'facil', tempoAberto: '6d em aberto', detailLink: true,
-        },
-        {
-          os: '107', plate: 'CLJ9637', fleet: '4681',
-          departments: ['Manutenção', 'Mecânica'],
-          tags: [{ label: 'Mecânica', tone: 'brand' }],
-          difficulty: 'medio', tempoAberto: '7d em aberto', detailLink: true,
-        },
-      ],
-    },
-    {
-      key: 'progresso', title: 'Em Progresso', count: 9,
-      cards: [
-        {
-          os: '135', plate: 'NKT6507', fleet: '6259',
-          departments: ['Manutenção', 'Mecânica'],
-          tags: [{ label: 'Mecânica', tone: 'brand' }],
-          difficulty: 'facil', previsao: 'Previsto: 2h', atraso: '+6d (#135.1)',
-        },
-        {
-          os: '136', plate: 'FYS4755', fleet: '5905',
-          departments: ['Manutenção', 'Borracharia'],
-          tags: [{ label: 'Borracharia' }],
-          difficulty: 'medio', previsao: 'Previsto: 6h', atraso: '+6d (#136.1)',
-        },
-        {
-          os: '117', plate: 'FCF3551', fleet: '6016',
-          departments: ['Manutenção', 'Mecânica', 'Mazza'],
-          tags: [{ label: 'Mecânica', tone: 'brand' }],
-          difficulty: 'medio', previsao: 'Previsto: 2h', atraso: '+6d (#117.3)',
-        },
-      ],
-    },
-    {
-      key: 'concluida', title: 'Concluída', count: 2,
-      cards: [
-        {
-          os: '131', plate: 'CLJ9631', fleet: '4678',
-          departments: ['Manutenção', 'Mecânica', 'Carlino'],
-          tags: [{ label: 'Mecânica', done: true }],
-          difficulty: 'medio', tempoAberto: '7d em aberto',
-        },
-        {
-          os: '138', plate: 'RDJ1234', fleet: '1234',
-          departments: ['Manutenção', 'Borracharia', 'Mazza'],
-          tags: [{ label: 'Borracharia', done: true }],
-          difficulty: 'facil', tempoAberto: '6d em aberto',
-        },
-      ],
-    },
-  ],
-  total: 32,
-};
+function darkenHex(hex, factor) {
+  const { r, g, b } = hexToRgb(hex);
+  return `rgb(${Math.round(r * factor)}, ${Math.round(g * factor)}, ${Math.round(b * factor)})`;
+}
+
+function truncateTag(name, max) {
+  if (!name) return '';
+  if (name.length <= max) return name;
+  return name.slice(0, max - 3).trim() + '...';
+}
+
+function transformBoardData(items, columnsConfig) {
+  const now = Date.now();
+  const grouped = {};
+  columnsConfig.forEach(c => { grouped[c.title] = []; });
+
+  items.forEach(item => {
+    const colName = item.columnName;
+    if (!grouped[colName]) grouped[colName] = [];
+    const movedAt = new Date(item.movedat).getTime();
+    const elapsed = now - movedAt;
+    grouped[colName].push({
+      plate: item.asset.identification,
+      sub: item.subTitle || '',
+      tag: truncateTag(item.tag?.name, 18),
+      tagColor: item.tag?.color || null,
+      time: formatElapsed(elapsed),
+      parked: formatElapsed(elapsed),
+      stripes: elapsed < 86400000 ? 1 : elapsed < 259200000 ? 2 : 3,
+    });
+  });
+
+  const cols = columnsConfig.map(cfg => {
+    const cards = grouped[cfg.title] || [];
+    return { key: cfg.key, title: cfg.title, count: cards.length, tone: cfg.tone, cards };
+  });
+
+  return { cols, total: items.length };
+}
+
+async function fetchBoard(boardId) {
+  const res = await fetch(`${RABBOT_API}/${boardId}/search`, {
+    method: 'POST', headers: RABBOT_HEADERS, body: JSON.stringify(RABBOT_PAYLOAD),
+  });
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  const data = await res.json();
+  return data.items || [];
+}
+
+async function fetchKanbanDisp() {
+  const items = await fetchBoard(BOARD_ID_DISP);
+  return transformBoardData(items, DISP_COLUMNS);
+}
+
+async function fetchKanbanManut() {
+  const items = await fetchBoard(BOARD_ID_MANUT);
+  return transformBoardData(items, MANUT_COLUMNS);
+}
+
+// Fallback mock data (used if API fails)
+const KANBAN_DISP_FALLBACK = { cols: DISP_COLUMNS.map(c => ({ ...c, count: 0, cards: [] })), total: 0 };
+const KANBAN_MANUT_FALLBACK = { cols: MANUT_COLUMNS.map(c => ({ ...c, count: 0, cards: [] })), total: 0 };
 
 // Antes x Depois
 const BEFORE_AFTER = [
@@ -295,7 +302,123 @@ const ENTREGAS = [
   { entrega: 'Go-live preditivo', resp: 'Ambos', prazo: 'D+90', tone: 'neutral' },
 ];
 
+// ── OS API integration ──
+const CATEGORY_TONE = {
+  'Mecânica': 'brand',
+  'Elétrica': 'amber',
+  'Borracharia': 'neutral',
+};
+
+const COMPLEXITY_MAP = {
+  'b8e2f02d-244f-4aa0-8e99-6720c8803860': { label: 'Simples', bars: 1 },
+  '0432a16f-d5d1-441c-9b6b-16132cb47de5': { label: 'Médio', bars: 2 },
+  '0e231c53-0a83-445a-952e-e6f3b7a8b5a3': { label: 'Complexo', bars: 3 },
+};
+
+function transformOSItem(item, catColorMap) {
+  const now = Date.now();
+  const created = new Date(item.createdAt).getTime();
+  const elapsed = formatElapsed(now - created);
+  const cat = (item.categories && item.categories[0]) || {};
+  const areaTone = CATEGORY_TONE[cat.name] || 'neutral';
+  const compKey = item.complexity?.key;
+  const comp = COMPLEXITY_MAP[compKey];
+  const critPrio = item.criticity?.priority;
+  const CRIT_FALLBACK = { 1: { label: 'Baixa', bars: 1 }, 2: { label: 'Média', bars: 2 }, 3: { label: 'Alta', bars: 3 }, 4: { label: 'Urgente', bars: 3 } };
+  const critFallback = critPrio ? CRIT_FALLBACK[critPrio] : null;
+  const resolved = comp || critFallback;
+  const fields = item.fields || [];
+  const subParts = fields.map(f => f.value).filter(Boolean);
+  const resp = (item.childrenResponsibles || []).map(r => r.name).join(', ');
+  const deadline = item.deadlineInfo || {};
+  const isDone = item.step?.name === 'Concluída';
+
+  return {
+    os: '#' + item.osNumber,
+    plate: item.asset?.identification || '',
+    sub: subParts.length ? subParts.join(' ') : '',
+    setor: 'Manutenção',
+    resp: resp || undefined,
+    area: cat.name || '',
+    areaColor: cat.color || catColorMap[cat.key] || null,
+    areaTone,
+    done: isDone,
+    complex: comp ? comp.label : undefined,
+    complexBars: resolved ? resolved.bars : 0,
+    tempo: elapsed + ' em aberto',
+    previsto: deadline.expectedTime || undefined,
+    atraso: deadline.status === 'DELAYED' ? (deadline.statusTime + ' (' + deadline.childReference + ')') : undefined,
+  };
+}
+
+function transformOSData(apiData) {
+  const steps = apiData.steps || [];
+
+  // Build color map by category key (use first non-empty color found)
+  const catColorMap = {};
+  steps.forEach(step => {
+    step.items.forEach(item => {
+      (item.categories || []).forEach(c => {
+        if (c.color && !catColorMap[c.key]) catColorMap[c.key] = c.color;
+      });
+    });
+  });
+
+  const cols = steps.map(step => ({
+    key: step.stepKey,
+    title: step.stepName,
+    count: step.metadata.itemsCount,
+    tone: step.stepName === 'Concluída' ? 'brand' : step.stepName === 'Em Progresso' ? 'purple' : 'neutral',
+    cards: step.items.map(item => transformOSItem(item, catColorMap)),
+  }));
+  const total = cols.reduce((s, c) => s + c.count, 0);
+
+  // Build summary by category
+  const catMap = {};
+  steps.forEach(step => {
+    step.items.forEach(item => {
+      const cat = (item.categories && item.categories[0])?.name || 'Outros';
+      if (!catMap[cat]) catMap[cat] = { area: cat, tone: CATEGORY_TONE[cat] || 'neutral', aberta: 0, progresso: 0, concluida: 0 };
+      if (step.stepName === 'Aberta') catMap[cat].aberta++;
+      else if (step.stepName === 'Em Progresso') catMap[cat].progresso++;
+      else if (step.stepName === 'Concluída') catMap[cat].concluida++;
+    });
+  });
+  const summary = Object.values(catMap).sort((a, b) => (b.aberta + b.progresso + b.concluida) - (a.aberta + a.progresso + a.concluida));
+
+  return { kanban: { cols, total }, summary };
+}
+
+function getTodayFormatted() {
+  const d = new Date();
+  return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear();
+}
+
+async function fetchKanbanOS() {
+  const res = await fetch('https://api-v3.rabbot.co/v1/saas/serviceorder/search', {
+    method: 'POST',
+    headers: RABBOT_HEADERS,
+    body: JSON.stringify({
+      step: '', pagination: { pageNumber: 1, pageSize: 200 },
+      sorting: '', sortingOrder: 'DESCENDING', filter: '',
+      category: null, complexity: null, criticity: null,
+      delayedOnly: false, fields: [], filterFields: [],
+      stepDateFilters: [],
+    }),
+  });
+  if (!res.ok) throw new Error('OS API error: ' + res.status);
+  const data = await res.json();
+  return transformOSData(data);
+}
+
+const KANBAN_OS_FALLBACK = { cols: [], total: 0 };
+const OS_SUMMARY_FALLBACK = [];
+
 Object.assign(window, {
-  CLIENT, TEAM, TIMELINE, DIAG, PHASES, CHECKLIST_SAMPLE, CHECKLIST_WEEKLY,
-  KANBAN_DISP, KANBAN_MANUT, KANBAN_OS, BEFORE_AFTER, projectarFrota, MILESTONES, ENTREGAS,
+  CLIENT, TEAM, TIMELINE, DIAG, PHASES,
+  CHECKLIST_FALLBACK, fetchChecklists,
+  KANBAN_DISP_FALLBACK, KANBAN_MANUT_FALLBACK, fetchKanbanDisp, fetchKanbanManut,
+  hexToRgb, darkenHex,
+  BEFORE_AFTER, projectarFrota, MILESTONES, ENTREGAS,
+  KANBAN_OS_FALLBACK, OS_SUMMARY_FALLBACK, fetchKanbanOS,
 });
