@@ -725,7 +725,14 @@ function AfterVisual({ kind }) {
 function AntesDepoisSection() {
   return (
     <Section id="antes-depois">
-      <SectionHeader title="O que vai mudar na sua operação" subtitle="Do controle manual e fragmentado para uma plataforma integrada." />
+      <SectionHeader title="O que já mudou — e o que vem a seguir" subtitle="Em um único dia de piloto, a Rabbot já transformou parte da operação. A plataforma está pronta pra uso — imagine o impacto com maturidade de uso." />
+      <Reveal>
+        <div className="rounded-xl bg-brand-50 border border-brand-200 px-6 py-4 mb-8">
+          <p className="text-sm text-subink leading-relaxed">
+            Durante o piloto, implantamos a plataforma na operação da Rodojacto e testamos na prática. Os resultados abaixo são reais — colhidos em <strong className="text-ink">um dia de uso</strong>. A plataforma já está configurada e pronta para continuar rodando.
+          </p>
+        </div>
+      </Reveal>
       <Reveal>
         <div className="grid md:grid-cols-2 gap-6">
           {/* ANTES */}
@@ -771,10 +778,11 @@ function AntesDepoisSection() {
                 {[
                   { title: 'Planilha manual de disponibilidade', desc: 'Google Sheets com 200+ carretas atualizada manualmente — dados desatualizados em horas.', tag: 'Frota visível só pra quem mantém a planilha' },
                   { title: 'B-Time, MO e SAP desconectados', desc: 'Apontamento no B-Time não gera OS — responsável re-digita tudo manualmente no MO.', tag: '3 digitações para 1 evento' },
-                  { title: 'OS abertas com atraso e retrabalho', desc: 'Intervalo entre apontamento e abertura de OS depende de ação humana intermediária.', tag: 'Tempo produtivo perdido por Alessandro' },
+                  { title: 'Etapa manual que deveria ser automática', desc: 'Intervalo entre apontamento e abertura de OS depende de ação humana intermediária.', tag: 'Tempo produtivo perdido por Alessandro' },
                   { title: 'Carretas ociosas sem alerta', desc: 'Carretas paradas no bolsão Jato (ou no pátio) sem notificação automática.', tag: 'Custo de imobilização invisível' },
-                  { title: 'Disponibilidade por ligação/WhatsApp', desc: 'Marcos Alcar e Alessandro tomam decisões sem dados consolidados em tempo real.', tag: 'Decisão baseada em feeling' },
-                  { title: 'Sem histórico por placa', desc: 'Reincidências não identificadas — mesmo problema repetido no mesmo ativo sem alerta.', tag: 'Retrabalho e custos ocultos' },
+                  { title: 'Carretas presas no pátio do cliente sem controle', desc: 'Sem saber há quantos dias está parada.', tag: 'Custo oculto de imobilização externa' },
+                  { title: 'Sem priorização de OS por tipo de carreta', desc: 'Fila sem distinção de baú, prancha, sider.', tag: 'Fila genérica que ignora criticidade' },
+                  { title: 'Rastreador não confiável como fonte de verdade', desc: '"O rastreador diz que tá disponível, mas quando vou ver, a carreta tá no pátio sem condição de rodar." — Alessandro', tag: 'Dado que não reflete a realidade' },
                 ].map((item, i) => (
                   <div key={i}>
                     <div className="flex items-start gap-3">
@@ -800,12 +808,13 @@ function AntesDepoisSection() {
 
               <div className="space-y-5">
                 {[
-                  { title: 'Kanban de disponibilidade em tempo real', desc: 'Alessandro e Marcos Alcar veem toda a frota ao vivo — por tipo, status e localização.', tag: 'Substitui a planilha Google Sheets' },
+                  { title: 'Kanban de disponibilidade em tempo real', desc: 'Alessandro e Marcos Brasil veem toda a frota ao vivo — por tipo, status e localização.', tag: 'Substitui a planilha Google Sheets' },
                   { title: 'Checklist Rabbot substitui o B-Time', desc: 'Motorista preenche no app → card vai ao kanban → OS aberta automaticamente no MO.', tag: 'Zero re-digitação manual' },
-                  { title: 'Abertura automática de OS + baixa no SAP', desc: 'OS gerada na Rabbot sincroniza com MO e baixa no SAP — sem nenhuma etapa manual.', tag: 'Fim da duplicação entre sistemas' },
-                  { title: 'Agente IA alerta carreta ociosa', desc: 'Carreta parada além do limite gera alerta automático — inclui bolsões externos (Jato).', tag: 'Custo de imobilização eliminado' },
+                  { title: 'Abertura automática de OS + baixa no SAP', desc: 'Integração completa em 1 passo.', tag: 'Fim da duplicação entre sistemas' },
+                  { title: 'Agente IA monitora carreta parada no cliente', desc: 'Inclui bolsão Jato com dias de ociosidade.', tag: 'Custo de imobilização eliminado' },
                   { title: 'Dashboard disponível 24/7 por placa', desc: 'Sider, baú, prancha, truque — status, MTBF, MTTR e ranking de produtividade em tempo real.', tag: 'Decisão baseada em dados' },
-                  { title: 'Histórico unificado por placa', desc: 'Reincidências identificadas automaticamente — mesmo problema gera alerta para Alessandro.', tag: 'Retrabalho eliminado' },
+                  { title: 'Priorização de OS por tipo de carreta e criticidade', desc: 'Fila inteligente que distingue baú, prancha e sider pela urgência real.', tag: 'Manutenção orientada por impacto' },
+                  { title: 'Kanban como fonte de verdade da frota', desc: 'Status real, independente do rastreador.', tag: 'Dado confiável para decisão' },
                 ].map((item, i) => (
                   <div key={i}>
                     <div className="flex items-start gap-3">

@@ -14,12 +14,12 @@ const CLIENT = {
 };
 
 const TEAM = [
-  { name: 'Marcio T', role: 'Ger. Operacional' },
-  { name: 'Alessandro Trinca', role: 'Ger. Manutenção' },
-  { name: 'Fábio Tadal', role: 'Ger. Torre de Controle' },
-  { name: 'Marcos Garcia', role: 'Compras' },
-  { name: 'Marcos Brasil', role: 'Ger. Processos e Inovação' },
   { name: 'Marcos Aukar', role: 'Diretor Geral Rodojacto' },
+  { name: 'Marcos Brasil', role: 'Ger. Processos e Inovação' },
+  { name: 'Fábio Tadal', role: 'Ger. Torre de Controle' },
+  { name: 'Alessandro Trinca', role: 'Ger. Manutenção' },
+  { name: 'Marcio Trambaioli', role: 'Ger. Operacional' },
+  { name: 'Marcos Garcia', role: 'Compras' },
 ];
 
 const TIMELINE = [
@@ -33,10 +33,10 @@ const TIMELINE = [
 ];
 
 const DIAG = [
-  { dim: 'Qualidade de Dados', level: 2, status: 'B-Time, MO e SAP isolados; dados em silos.' },
-  { dim: 'Gestão das Informações', level: 2, status: '3 sistemas, 3 digitações; sem fonte única.' },
-  { dim: 'Visão Sistêmica', level: 3, status: 'Planilha de disponibilidade existe, mas é manual.' },
-  { dim: 'Resultados (KPIs)', level: 1, status: 'Sem dashboards de frota; decisões sem dados.' },
+  { dim: 'Qualidade de Dados', level: 2, status: 'Possui BTime, MO e SAP, mas não estão conectados. Falta de dados em tempo real.' },
+  { dim: 'Gestão das Informações', level: 3, status: '3 sistemas e algumas digitações manuais. Disponibilidade com preenchimento manual.' },
+  { dim: 'Visão Sistêmica', level: 3, status: 'Planilha de disponibilidade existe, mas é manual. BTime importante, mas com ressalvas.' },
+  { dim: 'Resultados (KPIs)', level: 2, status: 'Há dashboards, mas não são simples e dependem de preenchimentos manuais.' },
 ];
 
 const PHASES = [

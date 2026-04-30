@@ -141,7 +141,7 @@ function BlitzSection() {
     <Section id="blitz">
       <SectionHeader
         title={<span className="flex items-center gap-2 flex-wrap">Blitz concluída <Pill tone="brand" icon={<IconCheck size={12} strokeWidth={1.5} />}>Concluída</Pill></span>}
-        subtitle="Um dia completo dentro da operação da Rodojacto para mapear processos, dores e definir os KPIs do POV."
+        subtitle="Um dia de piloto dentro da operação da Rodojacto — com implantação e teste da plataforma Rabbot para mapear processos, identificar dores e provar impacto e retorno na prática."
       />
       <Reveal>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -272,123 +272,7 @@ function DiagSection() {
     <Section id="diagnostico" className="bg-white border-y border-stone-200/70">
       <SectionHeader title="Diagnóstico" />
 
-      {/* Introdução geral */}
-      <Reveal>
-        <p className="text-sm text-subink leading-relaxed mb-10">
-          Os indicadores abaixo foram coletados durante a Blitz, em entrevistas e observação direta com o time operacional da Rodojacto. Cada métrica é comparada à média do mercado de transporte rodoviário brasileiro para situar a operação em relação ao setor.
-        </p>
-      </Reveal>
-
-      {/* ── Bloco 1: Diagnóstico da operação ── */}
-      <Reveal>
-        <div className="mb-12">
-          <h3 className="text-lg font-semibold text-ink tracking-tight mb-1">Diagnóstico da sua operação</h3>
-          <p className="text-sm text-subink mb-4">Indicadores-chave da Rodojacto comparados à média de mercado.</p>
-          <div className="rounded-lg border-l-[3px] border-emerald-500 bg-stone-50 px-4 py-3 mb-6">
-            <p className="text-[13px] text-subink leading-relaxed"><span className="font-medium text-ink">Como ler:</span> o ponto escuro indica a posição da Rodojacto em cada métrica. A faixa cinza representa o intervalo observado no mercado. Quanto mais centralizado dentro da faixa — ou além dela, no sentido positivo — melhor o desempenho relativo ao setor.</p>
-          </div>
-          <Card grad className="p-5 md:p-6">
-            <div>
-              <BenchmarkBar
-                label="Taxa de utilização"
-                value={56} valueLabel="56%"
-                rangeMin={30} rangeMax={75}
-                scaleMax={100}
-                ticks={[0,10,20,30,40,50,60,70,80,90,100]}
-                unit="%" color="green"
-              />
-              <p className="text-[11px] text-stone-400 leading-snug mt-1 mb-4">Percentual do tempo em que a frota está produtiva (em rota ou operação ativa).</p>
-            </div>
-            <div>
-              <BenchmarkBar
-                label="Mix manutenção"
-                value={30} valueLabel="30%"
-                rangeMin={10} rangeMax={80}
-                scaleMax={100}
-                ticks={[0,10,20,30,40,50,60,70,80,90,100]}
-                unit="%" color="coral"
-              />
-              <p className="text-[11px] text-stone-400 leading-snug mt-1 mb-4">Proporção entre manutenções preventivas e corretivas. Operações maduras têm mix mais alto.</p>
-            </div>
-            <div>
-              <BenchmarkBar
-                label="Custo manutenção"
-                value={4000} valueLabel="R$ 4.0k"
-                rangeMin={500} rangeMax={5500}
-                scaleMax={6000}
-                ticks={[0,1000,2000,3000,4000,5000,6000]}
-                unit="R$" color="blue"
-              />
-              <p className="text-[11px] text-stone-400 leading-snug mt-1">Custo médio mensal de manutenção por veículo. Inclui peças, mão de obra e paradas operacionais.</p>
-            </div>
-          </Card>
-        </div>
-      </Reveal>
-
-      {/* ── Bloco 2: Distribuição do tempo da frota ── */}
-      <Reveal delay={60}>
-        <div className="mb-12">
-          <h3 className="text-lg font-semibold text-ink tracking-tight mb-1">Distribuição do tempo da frota</h3>
-          <p className="text-sm text-subink mb-4">Onde o tempo da operação realmente acontece, em % do total.</p>
-          <Card grad className="p-5 md:p-6">
-            {/* Stacked bar */}
-            <div className="flex rounded-xl overflow-hidden" style={{ height: 64 }}>
-              {[
-                { label: 'Rota', value: 56, bg: '#047857', text: 'text-white' },
-                { label: 'Manutenção', value: 18, bg: '#78716c', text: 'text-white' },
-                { label: 'Pátio', value: 14, bg: '#a8a29e', text: 'text-white' },
-                { label: 'Cliente', value: 7, bg: '#c8c5c0', text: 'text-stone-700' },
-                { label: 'Espera', value: 5, bg: '#d6d3d1', text: 'text-stone-700' },
-              ].map((s, i) => (
-                <div key={i} className={`flex flex-col items-center justify-center overflow-hidden px-1 ${s.text}`} style={{ width: `${s.value}%`, background: s.bg }}>
-                  <span className="text-[10px] font-medium leading-tight">{s.label}</span>
-                  <span className="text-[11px] font-semibold leading-tight">{s.value}%</span>
-                </div>
-              ))}
-            </div>
-            {/* Legend */}
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-4">
-              {[
-                { label: 'Rota', value: 56, color: '#047857', desc: 'Veículo em movimento, gerando receita' },
-                { label: 'Manutenção', value: 18, color: '#78716c', desc: 'Em oficina ou aguardando peça' },
-                { label: 'Pátio', value: 14, color: '#a8a29e', desc: 'Parado em pátio, disponível mas sem carga' },
-                { label: 'Cliente', value: 7, color: '#c8c5c0', desc: 'Aguardando em cliente (carga/descarga)' },
-                { label: 'Espera', value: 5, color: '#d6d3d1', desc: 'Demais paradas não produtivas' },
-              ].map((s, i) => (
-                <div key={i} className="flex items-center gap-1.5" title={s.desc}>
-                  <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: s.color }} />
-                  <span className="text-xs text-subink">{s.label}</span>
-                  <span className="text-xs font-medium text-ink tabular-nums">{s.value}%</span>
-                </div>
-              ))}
-            </div>
-            {/* Insights */}
-            <div className="mt-5 pt-5 border-t border-stone-200/70 space-y-2">
-              <div className="flex items-start gap-2 text-sm text-subink leading-relaxed">
-                <span className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: '#047857' }} />
-                <span><span className="font-medium text-ink">56% em rota</span> — frota produtiva mais da metade do tempo, dentro do esperado para o setor</span>
-              </div>
-              <div className="flex items-start gap-2 text-sm text-subink leading-relaxed">
-                <span className="w-1.5 h-1.5 rounded-full bg-stone-500 mt-1.5 shrink-0" />
-                <span><span className="font-medium text-ink">18% em manutenção</span> — quase 1 em cada 5 dias parado; principal alvo de redução</span>
-              </div>
-              <div className="flex items-start gap-2 text-sm text-subink leading-relaxed">
-                <span className="w-1.5 h-1.5 rounded-full bg-stone-400 mt-1.5 shrink-0" />
-                <span><span className="font-medium text-ink">14% em pátio + 5% em espera</span> — 19% do tempo em ociosidade não produtiva, oportunidade clara</span>
-              </div>
-            </div>
-          </Card>
-        </div>
-      </Reveal>
-
-      {/* Transição para maturidade */}
-      <Reveal delay={80}>
-        <p className="text-sm text-subink leading-relaxed my-12 py-6 border-t border-b border-stone-200/70">
-          Os números acima mostram onde a operação está hoje. O diagnóstico de maturidade abaixo explica <span className="font-medium text-ink">por que</span> ela está nesse patamar — e o que precisa evoluir tecnicamente para mudar de fase.
-        </p>
-      </Reveal>
-
-      {/* ── Bloco 3: Maturidade técnica ── */}
+      {/* ── Maturidade técnica ── */}
       <Reveal delay={100}>
         <div className="mb-8">
           <h3 className="text-lg font-semibold text-ink tracking-tight mb-1">Maturidade técnica</h3>
@@ -438,12 +322,6 @@ function DiagSection() {
           </div>
 
           {/* Badge "Você está aqui" */}
-          <div className="flex justify-center mb-3">
-            <div className="bg-brand-600 text-white text-[10px] font-medium tracking-wide px-3 py-1 rounded-full whitespace-nowrap" role="status" aria-label="Fase atual: Adaptativo / Proativo">
-              Você está aqui
-            </div>
-          </div>
-
           {/* Barra segmentada — alinhada ao grid de 4 cards */}
           <div className="hidden lg:grid grid-cols-4 gap-2 mb-4" role="group" aria-label="Distribuição por fase de maturidade">
             {[
@@ -489,10 +367,17 @@ function DiagSection() {
             ))}
           </div>
 
+          {/* Badge "Você está aqui" sobre o card Proativo */}
+          <div className="flex justify-center mb-3">
+            <div className="bg-brand-600 text-white text-[10px] font-medium tracking-wide px-3 py-1 rounded-full whitespace-nowrap" role="status" aria-label="Fase atual: Proativo">
+              Você está aqui
+            </div>
+          </div>
+
           {/* Cards das fases */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {PHASES.map((p, i) => {
-              const isActive = i === 1;
+              const isActive = i === 2;
               return (
                 <div key={p.key} className={`p-4 rounded-xl border ${isActive ? 'border-brand-500/60 bg-brand-50/20' : 'border-stone-200/70 bg-white'}`}>
                   <div className="flex items-center justify-between mb-0.5">
@@ -509,7 +394,7 @@ function DiagSection() {
           {/* Rodapé com meta */}
           <div className="mt-8 pt-6 border-t border-stone-200/70 text-center">
             <p className="text-sm text-subink">
-              <span className="font-semibold text-ink">Meta:</span> Avançar da gestão <span className="font-semibold text-ink">Adaptativa</span> para uma operação <span className="font-semibold text-brand-600">Proativa</span>, automatizada e integrada.
+              <span className="font-semibold text-ink">Meta:</span> Avançar da gestão <span className="font-semibold text-ink">Proativa</span> para uma operação <span className="font-semibold text-brand-600">Preditiva</span>, automatizada e integrada.
             </p>
           </div>
         </Card>
@@ -540,71 +425,89 @@ function SobreSection() {
   const CLIENTS_TEXT = [];
   return (
     <Section id="sobre" className="bg-white border-y border-stone-200/70">
-      <SectionHeader
-        title="Por que a Rabbot está aqui"
-        subtitle="Cada hora parado custa caro. É isso que resolvemos para as maiores transportadoras do Brasil."
-      />
+      {/* ── Bloco institucional ── */}
+      <Reveal>
+        <div className="inline-block px-3 py-1 rounded-full bg-brand-50 text-brand-700 text-xs font-semibold uppercase tracking-wider mb-4">Quem é a Rabbot</div>
+        <h2 className="text-2xl md:text-3xl font-bold text-ink leading-tight tracking-tight mb-4">A Rabbot nasceu pra manter os caminhões do Brasil rodando.</h2>
+        <p className="text-sm text-subink leading-relaxed">
+          <strong className="text-ink">60 mil caminhões</strong> na plataforma · <strong className="text-ink">8 anos</strong> de operação · <strong className="text-ink">Bradesco</strong> entre os investidores
+        </p>
+      </Reveal>
 
-      {/* Grid: texto + foto */}
-      <div className="grid lg:grid-cols-[1fr_320px] gap-8 items-stretch mb-8">
-        <div>
-          {/* Texto narrativo */}
-          <Reveal>
-            <div className="space-y-4 text-sm text-subink leading-relaxed mb-8">
-              <p>
-                Operações de transporte ainda vivem no improviso — WhatsApp como sistema, planilhas como fonte da verdade, pátio sem rastro digital. A Rabbot existe pra mudar isso: digitalizamos o pátio, conectamos checklists, ordens de serviço e indicadores num só lugar.
-              </p>
-              <p>
-                A Blitz é como começamos toda parceria: um dia inteiro dentro da operação do cliente, mapeando o real antes de propor qualquer coisa.
-              </p>
-            </div>
-          </Reveal>
-
-          {/* Frota e operação — 2 cards */}
-          <Reveal delay={80}>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="card-grad border border-stone-200/70 rounded-xl p-4 card-hover">
-                <div className="flex items-center gap-1.5 text-muted text-xs font-medium uppercase tracking-wider">Frota gerida</div>
-                <div className="mt-2 text-base font-semibold text-ink tracking-tight">60K+</div>
-                <div className="mt-1 text-xs text-subink">Caminhões</div>
-              </div>
-              <div className="card-grad border border-stone-200/70 rounded-xl p-4 card-hover">
-                <div className="flex items-center gap-1.5 text-muted text-xs font-medium uppercase tracking-wider">Operação</div>
-                <div className="mt-2 text-base font-semibold text-ink tracking-tight">8 anos</div>
-                <div className="mt-1 text-xs text-subink">no mercado</div>
-              </div>
-            </div>
-          </Reveal>
-        </div>
-
-        {/* Foto da operação */}
-        <Reveal delay={120} className="h-full">
-          <div className="rounded-xl overflow-hidden border border-stone-200/70 h-full">
-            <img src="assets/blitz-01.jpeg" alt="Equipe Rodojacto + Rabbot" className="w-full h-full object-cover" />
-          </div>
-        </Reveal>
-      </div>
-
-      {/* Resultados que geramos — 3 cards */}
-      <Reveal delay={160}>
-        <div className="text-sm font-semibold text-ink mb-4">Resultados que geramos</div>
-        <div className="grid grid-cols-3 gap-3 mb-10">
+      {/* ── As 3 doenças crônicas ── */}
+      <Reveal delay={80}>
+        <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted mt-10 mb-4">As 3 doenças crônicas do transporte rodoviário</div>
+        <div className="grid md:grid-cols-3 gap-4 mb-10">
           {[
-            { value: '+10%', label: 'Disponibilidade do ativo' },
-            { value: '-15%', label: 'Manutenções corretivas' },
-            { value: '-6%', label: 'Redução de custo em peças' },
-          ].map((r, i) => (
-            <div key={i} className="card-grad border border-stone-200/70 rounded-xl p-5 card-hover text-center">
-              <div className="text-2xl font-semibold text-brand-700 tracking-tight">{r.value}</div>
-              <div className="mt-1.5 text-xs text-subink">{r.label}</div>
+            {
+              tag: 'D · Disponibilidade',
+              tagColor: 'text-red-600',
+              title: 'Veículo parado é receita perdida.',
+              desc: 'Transportadoras não enxergam, em tempo real, quais veículos estão parados, há quanto tempo, ou se dá pra contar com eles no próximo planejamento de carga.',
+            },
+            {
+              tag: 'M · Manutenção',
+              tagColor: 'text-red-600',
+              title: '90% ainda no papel e no WhatsApp.',
+              desc: 'Mesmo com ERP, TMS e rastreador, a operação acontece em planilha, grupo do WhatsApp e checklist no papel. Sem fonte da verdade.',
+            },
+            {
+              tag: 'A · Aquisição de Peças',
+              tagColor: 'text-red-600',
+              title: 'Peça errada paralisa o caminhão.',
+              desc: 'Tempo aguardando peça é o maior ofensor da manutenção. Compra errada ou atraso multiplica o tempo de veículo parado.',
+            },
+          ].map((d, i) => (
+            <div key={i} className="border border-stone-200/70 rounded-xl p-5 bg-white">
+              <div className={`text-xs font-bold uppercase tracking-wider mb-2 ${d.tagColor}`}>{d.tag}</div>
+              <div className="text-sm font-semibold text-ink mb-2">{d.title}</div>
+              <p className="text-xs text-subink leading-relaxed">{d.desc}</p>
             </div>
           ))}
         </div>
       </Reveal>
 
-      {/* Quem confia na Rabbot */}
-      <Reveal delay={240}>
-        <div className="text-sm font-semibold text-ink mb-5">Quem confia na Rabbot</div>
+      {/* ── Quanto isso custa hoje ── */}
+      <Reveal delay={120}>
+        <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted mb-4">Quanto isso custa hoje na sua operação</div>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+          {[
+            { tag: 'D · Disponibilidade', value: 'R$ 1.500/dia', sub: 'caminhão parado' },
+            { tag: 'M · Manutenção', value: '3 a 6 dias', sub: 'do problema à liberação' },
+            { tag: 'M · Manutenção', value: '3× mais caro', sub: 'preventiva vira corretiva' },
+            { tag: 'A · Peças', value: '+15%', sub: 'na compra sem competitividade' },
+            { tag: 'A · Almoxarifado', value: '20% diverg.', sub: 'estoque registrado vs real' },
+          ].map((c, i) => (
+            <div key={i} className="border border-red-200 bg-red-50/50 rounded-xl p-4 text-center">
+              <div className="text-[10px] font-medium uppercase tracking-wider text-muted mb-1.5">{c.tag}</div>
+              <div className="text-lg md:text-xl font-bold text-ink tracking-tight">{c.value}</div>
+              <div className="mt-1 text-[11px] text-subink">{c.sub}</div>
+            </div>
+          ))}
+        </div>
+      </Reveal>
+
+      {/* ── Com Rabbot — resultados ── */}
+      <Reveal delay={160}>
+        <div className="rounded-xl bg-brand-50 border border-brand-200 px-6 py-4 flex flex-wrap items-center justify-center gap-6 mb-10">
+          <span className="text-xs font-bold uppercase tracking-wider text-brand-700">Com Rabbot</span>
+          <span className="h-5 w-px bg-brand-200 hidden sm:block" />
+          {[
+            { value: '+10%', label: 'disponibilidade' },
+            { value: '−15%', label: 'corretivas' },
+            { value: '−6%', label: 'custo peças' },
+          ].map((r, i) => (
+            <div key={i} className="flex items-baseline gap-1.5">
+              <span className="text-lg font-bold text-brand-700">{r.value}</span>
+              <span className="text-xs text-brand-600">{r.label}</span>
+            </div>
+          ))}
+        </div>
+      </Reveal>
+
+      {/* ── Quem roda com a Rabbot ── */}
+      <Reveal delay={200}>
+        <div className="text-sm font-semibold text-ink mb-5">Quem roda com a Rabbot</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '24px 32px', alignItems: 'center', justifyItems: 'center' }}>
           {CLIENTS_WITH_LOGO.map((c, i) => (
             <div key={`logo-${i}`} style={{ width: '100%', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -614,8 +517,8 @@ function SobreSection() {
         </div>
       </Reveal>
 
-      {/* Parceiros e Investidores */}
-      <Reveal delay={300}>
+      {/* ── Parceiros e Investidores ── */}
+      <Reveal delay={260}>
         <div className="text-sm font-semibold text-ink mb-5 mt-10">Parceiros e Investidores</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '24px 32px', alignItems: 'center', justifyItems: 'center' }}>
           {[
@@ -633,19 +536,16 @@ function SobreSection() {
         </div>
       </Reveal>
 
-      {/* Case Braspress */}
-      <Reveal delay={360}>
+      {/* ── Case Braspress ── */}
+      <Reveal delay={320}>
         <div className="mt-12 rounded-2xl bg-stone-50 border border-stone-200/70 overflow-hidden">
           <div className="grid lg:grid-cols-2 items-stretch">
             <div className="p-6 md:p-8 flex flex-col justify-center">
-              {/* Eyebrow + logo */}
               <div className="flex items-center gap-3 mb-3">
                 <div className="text-[11px] font-medium uppercase tracking-[0.1em] text-stone-400">Case de sucesso</div>
                 <img src="assets/logos/braspress.png" alt="Braspress" style={{ height: 42, width: 'auto', objectFit: 'contain' }} />
               </div>
-              {/* Título principal */}
               <h3 className="text-lg font-bold text-ink leading-snug mb-4">Como a Braspress ganhou controle total da frota</h3>
-              {/* Texto descritivo */}
               <p className="text-sm text-subink leading-relaxed mb-2">
                 A Braspress, uma das maiores transportadoras de encomendas do Brasil, enfrentava desafios com a gestão de pátio e visibilidade da operação em tempo real. Com a Rabbot, a empresa digitalizou seus processos de checklist e manutenção, centralizou informações e ganhou controle total sobre a frota.
               </p>
@@ -655,16 +555,21 @@ function SobreSection() {
               <p className="text-xs text-muted">Assista à demonstração ao lado e veja como a transformação aconteceu na prática.</p>
             </div>
             <div className="bg-black min-h-[280px] lg:min-h-0">
-              <video
-                className="w-full h-full object-cover"
-                controls
-                preload="metadata"
-              >
+              <video className="w-full h-full object-cover" controls preload="metadata">
                 <source src="assets/braspressvideo.mp4" type="video/mp4" />
                 Seu navegador não suporta vídeos HTML5.
               </video>
             </div>
           </div>
+        </div>
+      </Reveal>
+
+      {/* ── Ponte para o diagnóstico ── */}
+      <Reveal delay={380}>
+        <div className="mt-12 rounded-xl bg-stone-50 border border-stone-200/70 px-6 py-5 text-center">
+          <p className="text-sm text-subink leading-relaxed">
+            Estamos aqui justamente porque <strong className="text-ink">identificamos esses mesmos problemas na operação de vocês</strong>. A seguir, o diagnóstico completo que levantamos durante a Blitz.
+          </p>
         </div>
       </Reveal>
     </Section>

@@ -957,12 +957,12 @@ function AgenteCTA() {
         {view === 'team' && (
           <AgenteCover
             eyebrow="Time Rabbot · Em construção"
-            title="Estamos construindo o time que vai"
-            titleAccent="rodar sua operação inteira."
-            subtitle="9 agentes de IA, 3 pilares, 1 operação coordenada. O primeiro agente já está em campo. Os próximos vêm aí."
-            description="O Time Rabbot é a nossa visão para gestão de frota: 9 agentes especialistas organizados em 3 pilares — Disponibilidade, Manutenção e Aquisição — mais 1 agente cross de conformidade. Quando completo, vai cobrir as 6 jornadas da frota 24/7, equivalendo a 9 FTEs por uma fração do custo. Estamos construindo esse time agente por agente, em parceria com nossos clientes. Hoje, o Agente de Disponibilidade já está em operação na Rodojacto, entregando resultado real."
+            title="Com o piloto, demos o primeiro passo rumo a uma operação"
+            titleAccent="toda gerida por IA."
+            subtitle="Conheça o futuro time da operação da Rodojacto. Começamos pelo Agente de Disponibilidade — o primeiro colaborador de IA já em campo."
+            description="O Time Rabbot é a nossa visão para gestão de frota: 9 agentes especialistas organizados em 3 pilares — Disponibilidade, Manutenção e Aquisição — mais 1 agente cross de conformidade. Quando completo, vai cobrir as 6 jornadas da frota 24/7, equivalendo a 9 FTEs por uma fração do custo. A manutenção e aquisição de peças já rodam na plataforma Rabbot de forma tradicional. A disponibilidade já conta com o primeiro colaborador de IA da Rodojacto — controlando a frota em tempo real. Estamos construindo esse time agente por agente, em parceria com nossos clientes."
             highlights={[
-              { label: '1 já em campo', desc: 'Agente de Disponibilidade, em operação na Rodojacto', icon: <IconCheck size={18} strokeWidth={1.5} /> },
+              { label: '1 já em campo', desc: 'Agente de Disponibilidade — primeiro colaborador de IA da Rodojacto', icon: <IconCheck size={18} strokeWidth={1.5} /> },
               { label: '8 em construção', desc: 'Manutenção, Aquisição e Cross no roadmap ativo', icon: <IconWrench size={18} strokeWidth={1.5} /> },
               { label: 'Construído com clientes', desc: 'Cada agente nasce de uma operação real', icon: <IconUsers size={18} strokeWidth={1.5} /> },
             ]}
