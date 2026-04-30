@@ -33,10 +33,10 @@ const TIMELINE = [
 ];
 
 const DIAG = [
-  { dim: 'Qualidade de Dados', level: 2, status: 'Planilhas fragmentadas; dados em WhatsApp.' },
-  { dim: 'Gestão das Informações', level: 2, status: 'Sem fonte única; retrabalho alto.' },
-  { dim: 'Visão Sistêmica', level: 3, status: 'Processos mapeados, execução inconsistente.' },
-  { dim: 'Resultados (KPIs)', level: 2, status: 'Indicadores reativos, sem meta clara.' },
+  { dim: 'Qualidade de Dados', level: 2, status: 'B-Time, MO e SAP isolados; dados em silos.' },
+  { dim: 'Gestão das Informações', level: 2, status: '3 sistemas, 3 digitações; sem fonte única.' },
+  { dim: 'Visão Sistêmica', level: 3, status: 'Planilha de disponibilidade existe, mas é manual.' },
+  { dim: 'Resultados (KPIs)', level: 1, status: 'Sem dashboards de frota; decisões sem dados.' },
 ];
 
 const PHASES = [
@@ -241,25 +241,24 @@ const KANBAN_MANUT_FALLBACK = { cols: MANUT_COLUMNS.map(c => ({ ...c, count: 0, 
 // Antes x Depois
 const BEFORE_AFTER = [
   {
-    before: 'WhatsApp',
+    before: 'Sem checklist de disponibilidade',
     after: 'Checklist Rabbot',
-    impact: 'De 30 min para <5 min',
-    quote: 'A gente passou a ter rastreabilidade. Antes era "alguém falou num grupo".',
-    who: 'Wilson, Gerente de Manutenção',
+    impact: 'Preenchimento manual → digital',
+    desc: 'Hoje o controle de disponibilidade é feito em planilha, preenchida manualmente, sem rastreabilidade.',
+    image: 'assets/planilha.jpeg',
   },
   {
-    before: 'Planilha Excel',
+    before: 'BTime com pouca integração',
     after: 'Kanban de Ativos',
-    impact: 'De 2h para tempo real',
-    quote: 'Agora a liderança abre no celular e sabe a foto do pátio na hora.',
-    who: 'Douglas, Líder de Pátio',
+    impact: 'Comunicação entre áreas fragmentada',
+    desc: 'O BTime não se comunica bem entre áreas e tem pouca integração com outros sistemas.',
   },
   {
-    before: 'Papel + caneta',
+    before: 'Controle manual de problemas',
     after: 'OS digital',
-    impact: 'De 18% para 0% OS perdidas',
-    quote: 'Nenhuma OS cai mais no vão. A oficina inteira trabalha no mesmo quadro.',
-    who: 'Marcos, Processos e Qualidade',
+    impact: 'Dificuldade em identificar problemas',
+    desc: 'Hoje há dificuldade em identificar os problemas apontados nos ativos e dar visibilidade para a operação.',
+    image: 'assets/whatsapp.png',
   },
 ];
 

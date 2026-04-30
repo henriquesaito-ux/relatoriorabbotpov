@@ -356,7 +356,19 @@ function ChecklistModal({ item, onClose }) {
 }
 
 // ---------- Carrossel de checklists ----------
-function ChecklistCarousel({ items }) {
+function ChecklistCarousel({ items: rawItems }) {
+  // Sort: deprioritized plates last, then items with photos first
+  const LAST_PLATES = ['RDJ1234', 'CLK9651'];
+  const items = React.useMemo(() => {
+    return [...rawItems].sort((a, b) => {
+      const aLast = LAST_PLATES.includes(a.plate) ? 1 : 0;
+      const bLast = LAST_PLATES.includes(b.plate) ? 1 : 0;
+      if (aLast !== bLast) return aLast - bLast;
+      const aHas = (a.photos && a.photos.length > 0) ? 1 : 0;
+      const bHas = (b.photos && b.photos.length > 0) ? 1 : 0;
+      return bHas - aHas;
+    });
+  }, [rawItems]);
   const scrollRef = React.useRef(null);
   const [canPrev, setCanPrev] = useStateM(false);
   const [canNext, setCanNext] = useStateM(true);
@@ -426,20 +438,26 @@ function ChecklistCarousel({ items }) {
                   <span className="text-xs text-ink">{c.who}</span>
                 </div>
 
-                {/* 3 fotos quadradas */}
-                <div className="grid grid-cols-3 gap-2 mb-3">
-                  {[0, 1, 2].map((j) => (
-                    <div key={j} className="rounded-lg relative overflow-hidden bg-stone-100" style={{ aspectRatio: '1/1' }}>
-                      {c.photos && c.photos[j] ? (
-                        <img src={c.photos[j]} alt="" className="w-full h-full object-cover" onError={e => { e.target.parentElement.style.display = 'none'; }} />
-                      ) : (
-                        <div className="ph-stripe w-full h-full flex items-center justify-center">
-                          <IconCamera size={14} strokeWidth={1.5} className="text-stone-400" />
+                {/* Fotos — só mostra as que existem; se nenhuma, 1 placeholder */}
+                {(() => {
+                  const realPhotos = (c.photos || []).filter(Boolean);
+                  const slots = realPhotos.length > 0 ? realPhotos : [null];
+                  return (
+                    <div className="grid grid-cols-3 gap-2 mb-3">
+                      {slots.slice(0, 3).map((photo, j) => (
+                        <div key={j} className="rounded-lg relative overflow-hidden bg-stone-100" style={{ aspectRatio: '1/1' }}>
+                          {photo ? (
+                            <img src={photo} alt="" className="w-full h-full object-cover" onError={e => { e.target.parentElement.style.display = 'none'; }} />
+                          ) : (
+                            <div className="ph-stripe w-full h-full flex items-center justify-center">
+                              <IconCamera size={14} strokeWidth={1.5} className="text-stone-400" />
+                            </div>
+                          )}
                         </div>
-                      )}
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  );
+                })()}
 
                 {/* Local */}
                 {c.place && (
@@ -707,71 +725,104 @@ function AfterVisual({ kind }) {
 function AntesDepoisSection() {
   return (
     <Section id="antes-depois">
-      <SectionHeader title="O que vai mudar na sua operação" subtitle="Três processos-chave que saíram do improviso para um fluxo rastreável." />
-      <div className="grid md:grid-cols-3 gap-4">
-        {BEFORE_AFTER.map((b, i) => (
-          <Reveal key={i} delay={i * 80}>
-            <div className="bg-white border border-stone-200/70 rounded-xl overflow-hidden h-full flex flex-col card-hover">
-              <div className="grid grid-cols-2 border-b border-stone-200/70" style={{ aspectRatio: '2/1' }}>
-                <div className="relative border-r border-stone-200/70 overflow-hidden">
-                  <div className="absolute top-1.5 left-1.5 z-10">
-                    <span className="text-[9px] font-mono uppercase tracking-wider bg-white/90 text-muted px-1.5 py-0.5 rounded">Antes</span>
-                  </div>
-                  <BeforeVisual kind={b.before} />
-                </div>
-                <div className="relative overflow-hidden">
-                  <div className="absolute top-1.5 left-1.5 z-10">
-                    <span className="text-[9px] font-mono uppercase tracking-wider bg-brand-600 text-white px-1.5 py-0.5 rounded">Depois</span>
-                  </div>
-                  <AfterVisual kind={b.after} />
-                </div>
-              </div>
-              <div className="p-4 flex-1 flex flex-col">
-                <div className="text-[11px] text-muted">{b.before} → {b.after}</div>
-                <div className="mt-1 text-base font-semibold text-ink">{b.impact}</div>
-                <div className="mt-3 pt-3 border-t border-stone-100 flex gap-2.5">
-                  <IconQuote size={14} strokeWidth={1.5} className="text-brand-600 shrink-0 mt-0.5" fill="currentColor" />
-                  <div>
-                    <p className="text-sm text-stone-700 leading-relaxed">"{b.quote}"</p>
-                    <p className="text-xs text-muted mt-1.5">— {b.who}</p>
-                  </div>
-                </div>
+      <SectionHeader title="O que vai mudar na sua operação" subtitle="Do controle manual e fragmentado para uma plataforma integrada." />
+      <Reveal>
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* ANTES */}
+          <div className="bg-white border border-stone-200/70 rounded-xl overflow-hidden flex flex-col">
+            <div className="px-5 pt-4 pb-2">
+              <span className="text-[10px] font-mono uppercase tracking-wider bg-stone-100 text-muted px-2 py-0.5 rounded">Hoje</span>
+              <h3 className="mt-2 text-base font-semibold text-ink">Planilha manual e comunicação fragmentada</h3>
+              <p className="text-sm text-muted mt-1">Sem checklist de disponibilidade, preenchimento manual em planilha e comunicação fragmentada entre áreas.</p>
+            </div>
+            <div className="p-4 flex-1">
+              <div className="rounded-lg overflow-hidden border border-stone-200/70">
+                <img src="assets/planilha.jpeg" alt="Planilha manual" className="w-full h-full object-cover" />
               </div>
             </div>
-          </Reveal>
-        ))}
-      </div>
+          </div>
+          {/* DEPOIS */}
+          <div className="bg-white border-2 border-brand-200 rounded-xl overflow-hidden flex flex-col">
+            <div className="px-5 pt-4 pb-2">
+              <span className="text-[10px] font-mono uppercase tracking-wider bg-brand-50 text-brand-700 px-2 py-0.5 rounded">Com a Rabbot</span>
+              <h3 className="mt-2 text-base font-semibold text-ink">Kanban integrado em tempo real</h3>
+              <p className="text-sm text-muted mt-1">Visibilidade entre todas as áreas, checklists digitais e ações automáticas sobre os dados.</p>
+            </div>
+            <div className="p-4 flex-1">
+              <div className="rounded-lg overflow-hidden border border-stone-200/70">
+                <img src="assets/kanbanrabbot.png" alt="Kanban Rabbot" className="w-full h-full object-cover" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </Reveal>
 
-      {/* BTime × Rabbot */}
+      {/* Antes × Depois */}
       <Reveal delay={300}>
         <div className="mt-12 pt-10 border-t border-stone-200/70">
-          <h3 className="text-lg font-semibold text-ink tracking-tight mb-1">BTime × Rabbot</h3>
-          <p className="text-sm text-subink mb-6">O sistema atual registra. A Rabbot age.</p>
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* ANTES */}
+            <div className="bg-white border border-stone-200/70 rounded-xl p-6">
+              <span className="text-[10px] font-mono uppercase tracking-wider bg-red-50 text-red-600 px-2 py-0.5 rounded">Antes</span>
+              <h3 className="mt-3 text-lg font-semibold text-ink">Processo manual e fragmentado</h3>
+              <p className="text-sm text-muted mt-1 mb-6">Como a operação funciona hoje</p>
 
-          <div className="overflow-x-auto">
-          <div className="border border-stone-200/70 rounded-xl overflow-hidden mb-10" style={{ minWidth: 600 }}>
-            <div className="grid grid-cols-[1.2fr_1.5fr_1.5fr] bg-stone-50 border-b border-stone-200/70 text-[10px] font-medium uppercase tracking-wider text-muted">
-              <div className="px-4 py-2.5">Aspecto</div>
-              <div className="px-4 py-2.5">BTime (hoje)</div>
-              <div className="px-4 py-2.5 border-l-2 border-brand-600">Rabbot</div>
-            </div>
-            {[
-              { aspecto: 'Checklists', btime: 'Existem, mas preenchidos manualmente', rabbot: 'Captura automática integrada ao fluxo do pátio' },
-              { aspecto: 'Visibilidade dos dados', btime: 'Restrita a setores específicos', rabbot: 'Conectada entre todas as áreas — pátio, manutenção, operação e liderança veem o mesmo' },
-              { aspecto: 'Automações', btime: 'Limitadas e padronizadas', rabbot: 'Personalizadas por operação e tipo de evento' },
-              { aspecto: 'Ação sobre o dado', btime: 'Operador identifica e aciona manualmente', rabbot: 'Agente de IA se comunica diretamente com motoristas e envolvidos' },
-              { aspecto: 'Natureza do sistema', btime: 'Registro digital de operação manual', rabbot: 'Plataforma operacional integrada' },
-              { aspecto: 'Tempo entre evento e ação', btime: 'Depende de alguém abrir o relatório', rabbot: 'Imediato — o sistema avisa antes de virar problema' },
-            ].map((row, i) => (
-              <div key={i} className={`grid grid-cols-[1.2fr_1.5fr_1.5fr] border-b last:border-b-0 border-stone-100 ${i % 2 === 0 ? 'bg-white' : 'bg-stone-50/50'}`}>
-                <div className="px-4 py-3.5 text-sm font-medium text-ink">{row.aspecto}</div>
-                <div className="px-4 py-3.5 text-sm text-subink">{row.btime}</div>
-                <div className="px-4 py-3.5 text-sm font-medium text-ink border-l-2 border-brand-600/30">{row.rabbot}</div>
+              <div className="space-y-5">
+                {[
+                  { title: 'Planilha manual de disponibilidade', desc: 'Google Sheets com 200+ carretas atualizada manualmente — dados desatualizados em horas.', tag: 'Frota visível só pra quem mantém a planilha' },
+                  { title: 'B-Time, MO e SAP desconectados', desc: 'Apontamento no B-Time não gera OS — responsável re-digita tudo manualmente no MO.', tag: '3 digitações para 1 evento' },
+                  { title: 'OS abertas com atraso e retrabalho', desc: 'Intervalo entre apontamento e abertura de OS depende de ação humana intermediária.', tag: 'Tempo produtivo perdido por Alessandro' },
+                  { title: 'Carretas ociosas sem alerta', desc: 'Carretas paradas no bolsão Jato (ou no pátio) sem notificação automática.', tag: 'Custo de imobilização invisível' },
+                  { title: 'Disponibilidade por ligação/WhatsApp', desc: 'Marcos Alcar e Alessandro tomam decisões sem dados consolidados em tempo real.', tag: 'Decisão baseada em feeling' },
+                  { title: 'Sem histórico por placa', desc: 'Reincidências não identificadas — mesmo problema repetido no mesmo ativo sem alerta.', tag: 'Retrabalho e custos ocultos' },
+                ].map((item, i) => (
+                  <div key={i}>
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center shrink-0 mt-0.5">
+                        <IconAlert size={14} strokeWidth={1.5} className="text-stone-400" />
+                      </div>
+                      <div>
+                        <div className="text-sm font-semibold text-ink">{item.title}</div>
+                        <p className="text-xs text-muted mt-0.5 leading-relaxed">{item.desc}</p>
+                      </div>
+                    </div>
+                    <div className="mt-2 ml-11 text-xs font-medium text-red-500">{item.tag}</div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          </div>
+            </div>
 
+            {/* DEPOIS */}
+            <div className="bg-white border-2 border-brand-200 rounded-xl p-6">
+              <span className="text-[10px] font-mono uppercase tracking-wider bg-brand-50 text-brand-700 px-2 py-0.5 rounded">Depois</span>
+              <h3 className="mt-3 text-lg font-semibold text-ink">Operação digital com Rabbot</h3>
+              <p className="text-sm text-muted mt-1 mb-6">Como fica a partir da implementação</p>
+
+              <div className="space-y-5">
+                {[
+                  { title: 'Kanban de disponibilidade em tempo real', desc: 'Alessandro e Marcos Alcar veem toda a frota ao vivo — por tipo, status e localização.', tag: 'Substitui a planilha Google Sheets' },
+                  { title: 'Checklist Rabbot substitui o B-Time', desc: 'Motorista preenche no app → card vai ao kanban → OS aberta automaticamente no MO.', tag: 'Zero re-digitação manual' },
+                  { title: 'Abertura automática de OS + baixa no SAP', desc: 'OS gerada na Rabbot sincroniza com MO e baixa no SAP — sem nenhuma etapa manual.', tag: 'Fim da duplicação entre sistemas' },
+                  { title: 'Agente IA alerta carreta ociosa', desc: 'Carreta parada além do limite gera alerta automático — inclui bolsões externos (Jato).', tag: 'Custo de imobilização eliminado' },
+                  { title: 'Dashboard disponível 24/7 por placa', desc: 'Sider, baú, prancha, truque — status, MTBF, MTTR e ranking de produtividade em tempo real.', tag: 'Decisão baseada em dados' },
+                  { title: 'Histórico unificado por placa', desc: 'Reincidências identificadas automaticamente — mesmo problema gera alerta para Alessandro.', tag: 'Retrabalho eliminado' },
+                ].map((item, i) => (
+                  <div key={i}>
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-full bg-brand-50 flex items-center justify-center shrink-0 mt-0.5">
+                        <IconCheck size={14} strokeWidth={1.5} className="text-brand-600" />
+                      </div>
+                      <div>
+                        <div className="text-sm font-semibold text-ink">{item.title}</div>
+                        <p className="text-xs text-muted mt-0.5 leading-relaxed">{item.desc}</p>
+                      </div>
+                    </div>
+                    <div className="mt-2 ml-11 text-xs font-medium text-brand-600">{item.tag}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </Reveal>
     </Section>
