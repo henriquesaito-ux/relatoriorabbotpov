@@ -764,73 +764,82 @@ function AntesDepoisSection() {
         </div>
       </Reveal>
 
-      {/* Antes × Depois */}
+      {/* Antes × Depois — grade pareada */}
       <Reveal delay={300}>
         <div className="mt-12 pt-10 border-t border-stone-200/70">
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* ANTES */}
-            <div className="bg-white border border-stone-200/70 rounded-xl p-6">
-              <span className="text-[10px] font-mono uppercase tracking-wider bg-red-50 text-red-600 px-2 py-0.5 rounded">Antes</span>
-              <h3 className="mt-3 text-lg font-semibold text-ink">Processo manual e fragmentado</h3>
-              <p className="text-sm text-muted mt-1 mb-6">Como a operação funciona hoje</p>
+          {/* Cabeçalhos de coluna */}
+          <div className="hidden md:grid md:grid-cols-2 gap-x-12 lg:gap-x-16 mb-8">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-red-600">Antes</span>
+            <span className="text-[10px] font-mono uppercase tracking-wider text-brand-700">Depois</span>
+          </div>
 
-              <div className="space-y-5">
-                {[
-                  { title: 'Planilha manual de disponibilidade', desc: 'Google Sheets com 200+ carretas atualizada manualmente — dados desatualizados em horas.', tag: 'Frota visível só pra quem mantém a planilha' },
-                  { title: 'B-Time, MO e SAP desconectados', desc: 'Apontamento no B-Time não gera OS — responsável re-digita tudo manualmente no MO.', tag: '3 digitações para 1 evento' },
-                  { title: 'Etapa manual que deveria ser automática', desc: 'Intervalo entre apontamento e abertura de OS depende de ação humana intermediária.', tag: 'Tempo produtivo perdido por Alessandro' },
-                  { title: 'Carretas ociosas sem alerta', desc: 'Carretas paradas no bolsão Jato (ou no pátio) sem notificação automática.', tag: 'Custo de imobilização invisível' },
-                  { title: 'Carretas presas no pátio do cliente sem controle', desc: 'Sem saber há quantos dias está parada.', tag: 'Custo oculto de imobilização externa' },
-                  { title: 'Sem priorização de OS por tipo de carreta', desc: 'Fila sem distinção de baú, prancha, sider.', tag: 'Fila genérica que ignora criticidade' },
-                  { title: 'Rastreador não confiável como fonte de verdade', desc: '"O rastreador diz que tá disponível, mas quando vou ver, a carreta tá no pátio sem condição de rodar." — Alessandro', tag: 'Dado que não reflete a realidade' },
-                ].map((item, i) => (
-                  <div key={i}>
+          {/* Pares */}
+          <div className="flex flex-col">
+            {[
+              {
+                before: { title: 'Planilha manual de disponibilidade', desc: 'Google Sheets com 200+ carretas atualizada manualmente — dados desatualizados em horas.', tag: 'Frota visível só pra quem mantém a planilha' },
+                after:  { title: 'Kanban de disponibilidade em tempo real', desc: 'Alessandro e Marcos Brasil veem toda a frota ao vivo — por tipo, status e localização.', tag: 'Substitui a planilha Google Sheets' },
+              },
+              {
+                before: { title: 'B-Time, MO e SAP desconectados', desc: 'Apontamento no B-Time não gera OS — responsável re-digita tudo manualmente no MO.', tag: '3 digitações para 1 evento' },
+                after:  { title: 'Checklist Rabbot substitui o B-Time', desc: 'Motorista preenche no app → card vai ao kanban → OS aberta automaticamente no MO.', tag: 'Zero re-digitação manual' },
+              },
+              {
+                before: { title: 'Etapa manual que deveria ser automática', desc: 'Intervalo entre apontamento e abertura de OS depende de ação humana intermediária.', tag: 'Tempo produtivo perdido por Alessandro' },
+                after:  { title: 'Abertura automática de OS + baixa no SAP', desc: 'Integração completa em 1 passo.', tag: 'Fim da duplicação entre sistemas' },
+              },
+              {
+                before: { title: 'Carretas ociosas sem alerta', desc: 'Carretas paradas no bolsão Jato (ou no pátio) sem notificação automática.', tag: 'Custo de imobilização invisível' },
+                after:  { title: 'Agente IA monitora carreta parada no cliente', desc: 'Inclui bolsão Jato com dias de ociosidade.', tag: 'Custo de imobilização eliminado' },
+              },
+              {
+                before: { title: 'Carretas presas no pátio do cliente sem controle', desc: 'Sem saber há quantos dias está parada.', tag: 'Custo oculto de imobilização externa' },
+                after:  { title: 'Dashboard disponível 24/7 por placa', desc: 'Sider, baú, prancha, truque — status, MTBF, MTTR e ranking de produtividade em tempo real.', tag: 'Decisão baseada em dados' },
+              },
+              {
+                before: { title: 'Sem priorização de OS por tipo de carreta', desc: 'Fila sem distinção de baú, prancha, sider.', tag: 'Fila genérica que ignora criticidade' },
+                after:  { title: 'Priorização de OS por tipo de carreta e criticidade', desc: 'Fila inteligente que distingue baú, prancha e sider pela urgência real.', tag: 'Manutenção orientada por impacto' },
+              },
+              {
+                before: { title: 'Rastreador não confiável como fonte de verdade', desc: '"O rastreador diz que tá disponível, mas quando vou ver, a carreta tá no pátio sem condição de rodar." — Alessandro', tag: 'Dado que não reflete a realidade' },
+                after:  { title: 'Kanban como fonte de verdade da frota', desc: 'Status real, independente do rastreador.', tag: 'Dado confiável para decisão' },
+              },
+            ].map((pair, i, arr) => (
+              <div key={i}>
+                <div className="grid md:grid-cols-2 gap-x-12 lg:gap-x-16 gap-y-6 py-8">
+                  {/* ANTES */}
+                  <div>
+                    <span className="md:hidden text-[10px] font-mono uppercase tracking-wider text-red-600 mb-3 block">Antes</span>
                     <div className="flex items-start gap-3">
                       <div className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center shrink-0 mt-0.5">
                         <IconAlert size={14} strokeWidth={1.5} className="text-stone-400" />
                       </div>
                       <div>
-                        <div className="text-sm font-semibold text-ink">{item.title}</div>
-                        <p className="text-xs text-muted mt-0.5 leading-relaxed">{item.desc}</p>
+                        <div className="text-sm font-semibold text-ink">{pair.before.title}</div>
+                        <p className="text-xs text-muted mt-0.5 leading-relaxed">{pair.before.desc}</p>
                       </div>
                     </div>
-                    <div className="mt-2 ml-11 text-xs font-medium text-red-500">{item.tag}</div>
+                    <div className="mt-2 ml-11 text-xs font-medium text-red-500">{pair.before.tag}</div>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* DEPOIS */}
-            <div className="bg-white border-2 border-brand-200 rounded-xl p-6">
-              <span className="text-[10px] font-mono uppercase tracking-wider bg-brand-50 text-brand-700 px-2 py-0.5 rounded">Depois</span>
-              <h3 className="mt-3 text-lg font-semibold text-ink">Operação digital com Rabbot</h3>
-              <p className="text-sm text-muted mt-1 mb-6">Como fica a partir da implementação</p>
-
-              <div className="space-y-5">
-                {[
-                  { title: 'Kanban de disponibilidade em tempo real', desc: 'Alessandro e Marcos Brasil veem toda a frota ao vivo — por tipo, status e localização.', tag: 'Substitui a planilha Google Sheets' },
-                  { title: 'Checklist Rabbot substitui o B-Time', desc: 'Motorista preenche no app → card vai ao kanban → OS aberta automaticamente no MO.', tag: 'Zero re-digitação manual' },
-                  { title: 'Abertura automática de OS + baixa no SAP', desc: 'Integração completa em 1 passo.', tag: 'Fim da duplicação entre sistemas' },
-                  { title: 'Agente IA monitora carreta parada no cliente', desc: 'Inclui bolsão Jato com dias de ociosidade.', tag: 'Custo de imobilização eliminado' },
-                  { title: 'Dashboard disponível 24/7 por placa', desc: 'Sider, baú, prancha, truque — status, MTBF, MTTR e ranking de produtividade em tempo real.', tag: 'Decisão baseada em dados' },
-                  { title: 'Priorização de OS por tipo de carreta e criticidade', desc: 'Fila inteligente que distingue baú, prancha e sider pela urgência real.', tag: 'Manutenção orientada por impacto' },
-                  { title: 'Kanban como fonte de verdade da frota', desc: 'Status real, independente do rastreador.', tag: 'Dado confiável para decisão' },
-                ].map((item, i) => (
-                  <div key={i}>
+                  {/* DEPOIS */}
+                  <div>
+                    <span className="md:hidden text-[10px] font-mono uppercase tracking-wider text-brand-700 mb-3 block">Depois</span>
                     <div className="flex items-start gap-3">
                       <div className="w-8 h-8 rounded-full bg-brand-50 flex items-center justify-center shrink-0 mt-0.5">
                         <IconCheck size={14} strokeWidth={1.5} className="text-brand-600" />
                       </div>
                       <div>
-                        <div className="text-sm font-semibold text-ink">{item.title}</div>
-                        <p className="text-xs text-muted mt-0.5 leading-relaxed">{item.desc}</p>
+                        <div className="text-sm font-semibold text-ink">{pair.after.title}</div>
+                        <p className="text-xs text-muted mt-0.5 leading-relaxed">{pair.after.desc}</p>
                       </div>
                     </div>
-                    <div className="mt-2 ml-11 text-xs font-medium text-brand-600">{item.tag}</div>
+                    <div className="mt-2 ml-11 text-xs font-medium text-brand-600">{pair.after.tag}</div>
                   </div>
-                ))}
+                </div>
+                {/* Divisor entre pares */}
+                {i < arr.length - 1 && <div className="border-t border-[#e5e7eb]" />}
               </div>
-            </div>
+            ))}
           </div>
         </div>
       </Reveal>
