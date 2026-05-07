@@ -1008,7 +1008,7 @@ function AgenteCTA() {
             <iframe
               src="https://rabbot-relatorio-agente-disponibilidade.lovable.app/?id=69cc049f95346de3a4e3d935"
               className="w-full border-0 rounded-lg"
-              style={{ height: '2000px' }}
+              style={{ height: '100vh' }}
               allowFullScreen
             />
           </div>
