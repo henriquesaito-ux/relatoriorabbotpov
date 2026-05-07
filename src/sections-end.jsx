@@ -999,39 +999,18 @@ function AgenteCTA() {
         {/* Nível 3 — Resultados */}
         {view === 'results' && (
           <div>
-            <div className="mb-8">
-              <button onClick={() => goTo('cover')}
-                className="inline-flex items-center gap-1.5 text-sm text-stone-500 hover:text-white transition mb-6">
-                <IconChevLeft size={14} strokeWidth={1.5} />
-                Sobre o agente
-              </button>
-              <div className="flex flex-col md:flex-row items-start justify-between gap-4">
-                <div>
-                  <h2 className="text-2xl md:text-3xl font-semibold tracking-tight leading-[1.15] text-white">
-                    Agente de <span className="text-brand-500">Disponibilidade</span>
-                  </h2>
-                  <p className="mt-2 text-sm text-stone-400">12/03/2026 a 05/04/2026 · Rodojacto</p>
-                </div>
-                <a href="https://rabbot-agent-rodojacto.lovable.app/" target="_blank" rel="noopener noreferrer"
-                  className="shrink-0 inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
-                  Abrir Agente
-                  <IconArrowRight size={14} strokeWidth={1.5} />
-                </a>
-              </div>
-            </div>
+            <button onClick={() => goTo('cover')}
+              className="inline-flex items-center gap-1.5 text-sm text-stone-500 hover:text-white transition mb-6">
+              <IconChevLeft size={14} strokeWidth={1.5} />
+              Sobre o agente
+            </button>
 
-            <div className="flex border-b border-white/10 mb-8 overflow-x-auto no-scrollbar">
-              {tabs.map((t) => (
-                <button key={t.key} onClick={() => setTab(t.key)}
-                  className={`px-5 py-2.5 text-sm font-medium transition border-b-2 -mb-px whitespace-nowrap ${tab === t.key ? 'border-brand-500 text-white' : 'border-transparent text-stone-500 hover:text-stone-300'}`}>
-                  {t.label}
-                </button>
-              ))}
-            </div>
-
-            {tab === 'visao' && <AgenteVisaoGeral />}
-            {tab === 'macro' && <AgentePorMacro />}
-            {tab === 'placa' && <AgentePorPlaca />}
+            <iframe
+              src="https://rabbot-relatorio-agente-disponibilidade.lovable.app/?id=69cc049f95346de3a4e3d935"
+              className="w-full border-0 rounded-lg"
+              style={{ height: '2000px' }}
+              allowFullScreen
+            />
           </div>
         )}
 
