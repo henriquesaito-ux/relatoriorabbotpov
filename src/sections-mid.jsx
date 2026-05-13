@@ -358,7 +358,7 @@ function ChecklistModal({ item, onClose }) {
 // ---------- Carrossel de checklists ----------
 function ChecklistCarousel({ items: rawItems }) {
   // Sort: deprioritized plates last, then items with photos first
-  const LAST_PLATES = ['RDJ1234', 'CLK9651'];
+  const LAST_PLATES = ['RDJ1234', 'CLJ9651'];
   const items = React.useMemo(() => {
     return [...rawItems].sort((a, b) => {
       const aLast = LAST_PLATES.includes(a.plate) ? 1 : 0;
