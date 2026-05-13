@@ -866,7 +866,7 @@ function AntesDepoisSection() {
             {[
               {
                 before: { title: 'Planilha manual de disponibilidade', desc: 'Google Sheets com 200+ carretas atualizada manualmente — dados desatualizados em horas.', tag: 'Frota visível só pra quem mantém a planilha' },
-                after:  { title: 'Kanban de disponibilidade em tempo real', desc: 'Alessandro e Marcos Brasil veem toda a frota ao vivo — por tipo, status e localização.', tag: 'Substitui a planilha Google Sheets' },
+                after:  { title: 'Kanban de disponibilidade em tempo real', desc: 'Marcio e Marcos Brasil veem toda a frota ao vivo — por tipo, status e localização.', tag: 'Substitui a planilha Google Sheets' },
               },
               {
                 before: { title: 'B-Time, MO e SAP desconectados', desc: 'Apontamento no B-Time não gera OS — responsável re-digita tudo manualmente no MO.', tag: '3 digitações para 1 evento' },
@@ -877,8 +877,8 @@ function AntesDepoisSection() {
                 after:  { title: 'Abertura automática de OS + baixa no SAP', desc: 'Integração completa em 1 passo.', tag: 'Fim da duplicação entre sistemas' },
               },
               {
-                before: { title: 'Carretas ociosas sem alerta', desc: 'Carretas paradas no bolsão Jato (ou no pátio) sem notificação automática.', tag: 'Custo de imobilização invisível' },
-                after:  { title: 'Agente IA monitora carreta parada no cliente', desc: 'Inclui bolsão Jato com dias de ociosidade.', tag: 'Custo de imobilização eliminado' },
+                before: { title: 'Carretas ociosas sem alerta', desc: 'Carretas paradas no bolsão Jacto (ou no pátio) sem notificação automática.', tag: 'Custo de imobilização invisível' },
+                after:  { title: 'Agente IA monitora carreta parada no cliente', desc: 'Inclui bolsão Jacto com dias de ociosidade.', tag: 'Custo de imobilização eliminado' },
               },
               {
                 before: { title: 'Carretas presas no pátio do cliente sem controle', desc: 'Sem saber há quantos dias está parada.', tag: 'Custo oculto de imobilização externa' },
