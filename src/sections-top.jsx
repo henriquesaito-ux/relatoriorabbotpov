@@ -316,61 +316,55 @@ function DiagSection() {
       <Reveal delay={250}>
         <Card className="p-6 md:p-10">
           {/* Header */}
-          <div className="mb-6">
+          <div className="mb-8">
             <h3 className="text-base md:text-lg font-semibold text-ink tracking-tight">Maturidade de Gestão Operacional</h3>
             <p className="text-xs text-muted mt-0.5">Rumo a uma gestão exponencial</p>
           </div>
 
-          {/* Badge "Você está aqui" */}
-          {/* Barra segmentada — alinhada ao grid de 4 cards */}
-          <div className="hidden lg:grid grid-cols-4 gap-2 mb-4" role="group" aria-label="Distribuição por fase de maturidade">
-            {[
-              { pct: 70, cols: 1 },
-              { pct: 20, cols: 2, active: true },
-              { pct: 10, cols: 1 },
-            ].map((seg, i) => (
-              <div
-                key={i}
-                className={`flex items-center justify-center h-10 text-xs font-medium rounded-lg ${
-                  seg.active
-                    ? 'bg-ink text-white'
-                    : 'bg-stone-100 text-stone-500 border border-stone-200/70'
-                }`}
-                style={{ gridColumn: `span ${seg.cols}` }}
-                role="meter"
-                aria-label={`${seg.pct}%`}
-                aria-valuenow={seg.pct}
-                aria-valuemin={0}
-                aria-valuemax={100}
-              >
-                {seg.pct}%
+          {/* ── Barra de progresso com pills e marcadores ── */}
+          <div className="mb-8 px-2 md:px-6">
+            {/* Pills flutuantes acima da barra */}
+            <div className="relative h-8 md:h-10 mb-2 md:mb-3">
+              {/* Pill Rodojacto — acima da bolinha 3 (~66%) */}
+              <div className="absolute flex flex-col items-center" style={{ left: '66%', transform: 'translateX(-50%)' }}>
+                <img src="assets/rodojacto-logo.png" alt="Rodojacto" className="h-5 md:h-6 object-contain" />
               </div>
-            ))}
-          </div>
-          {/* Mobile bar */}
-          <div className="flex lg:hidden gap-2 mb-4" role="group" aria-label="Distribuição por fase de maturidade">
-            {[
-              { pct: 70 },
-              { pct: 20, active: true },
-              { pct: 10 },
-            ].map((seg, i) => (
-              <div
-                key={i}
-                className={`flex items-center justify-center h-10 text-xs font-medium rounded-lg ${
-                  seg.active
-                    ? 'bg-ink text-white flex-[2]'
-                    : 'bg-stone-100 text-stone-500 border border-stone-200/70 flex-1'
-                }`}
-              >
-                {seg.pct}%
+              {/* Pill Clientes Rabbot — acima da bolinha 4 (~95%) */}
+              <div className="absolute flex flex-col items-center" style={{ right: 0 }}>
+                <div className="flex items-center gap-1 bg-white rounded-full px-2 md:px-3 py-0.5 md:py-1 shadow-sm whitespace-nowrap" style={{ border: '1.5px dashed #059669' }}>
+                  <span className="text-[9px] md:text-[11px] font-medium text-brand-700 tracking-tight">Clientes Rabbot</span>
+                </div>
               </div>
-            ))}
-          </div>
+            </div>
 
-          {/* Badge "Você está aqui" sobre o card Proativo */}
-          <div className="flex justify-center mb-3">
-            <div className="bg-brand-600 text-white text-[10px] font-medium tracking-wide px-3 py-1 rounded-full whitespace-nowrap" role="status" aria-label="Fase atual: Proativo">
-              Você está aqui
+            {/* Barra + marcadores */}
+            <div className="relative h-10 flex items-center">
+              {/* Barra de fundo */}
+              <div className="absolute inset-x-0 h-2.5 md:h-3 rounded-full overflow-hidden" style={{
+                background: 'linear-gradient(to right, #dc2626 0%, #ea580c 25%, #f97316 40%, #f59e0b 55%, #fbbf24 68%, #e5e7eb 72%, #e5e7eb 100%)'
+              }} />
+
+              {/* Marcadores circulares */}
+              {[
+                { pos: '5%', active: false },
+                { pos: '33%', active: false },
+                { pos: '66%', active: true },
+                { pos: '95%', active: false, future: true },
+              ].map((m, i) => (
+                <div key={i} className="absolute flex items-center justify-center" style={{ left: m.pos, transform: 'translateX(-50%)' }}>
+                  {m.active && (
+                    <div className="absolute rounded-full" style={{
+                      width: 40, height: 40,
+                      background: 'rgba(251, 191, 36, 0.30)',
+                    }} />
+                  )}
+                  <div className="relative rounded-full border-2 border-white shadow-sm" style={{
+                    width: m.active ? 22 : 16,
+                    height: m.active ? 22 : 16,
+                    background: m.future ? '#d1d5db' : '#f59e0b',
+                  }} />
+                </div>
+              ))}
             </div>
           </div>
 
@@ -380,11 +374,7 @@ function DiagSection() {
               const isActive = i === 2;
               return (
                 <div key={p.key} className={`p-4 rounded-xl border ${isActive ? 'border-brand-500/60 bg-brand-50/20' : 'border-stone-200/70 bg-white'}`}>
-                  <div className="flex items-center justify-between mb-0.5">
-                    <div className="text-[11px] font-medium uppercase tracking-wider text-muted">{p.sub}</div>
-                    {isActive && <span className="text-[10px] font-medium text-brand-600">Atual</span>}
-                  </div>
-                  <div className="text-sm font-semibold text-ink mb-1.5">{p.title}</div>
+                  <div className={`text-sm font-semibold mb-1.5 ${isActive ? 'text-brand-600' : 'text-ink'}`}>{p.title}</div>
                   <div className="text-xs text-subink leading-relaxed">{p.desc}</div>
                 </div>
               );
@@ -493,14 +483,14 @@ function SobreSection() {
           <span className="text-xs font-bold uppercase tracking-wider text-brand-700">Com Rabbot</span>
           <span className="h-5 w-px bg-brand-200 hidden sm:block" />
           {[
-            { value: '+10%', label: 'disponibilidade' },
-            { value: '−15%', label: 'corretivas' },
-            { value: '−6%', label: 'custo peças' },
-          ].map((r, i) => (
-            <div key={i} className="flex items-baseline gap-1.5">
-              <span className="text-lg font-bold text-brand-700">{r.value}</span>
-              <span className="text-xs text-brand-600">{r.label}</span>
-            </div>
+            'Aumento de disponibilidade',
+            'Diminuição de manutenção corretiva',
+            'Redução em custo de peças',
+          ].map((txt, i, arr) => (
+            <React.Fragment key={i}>
+              <span className="text-sm font-medium text-brand-700">{txt}</span>
+              {i < arr.length - 1 && <span className="h-5 w-px bg-brand-200 hidden sm:block" />}
+            </React.Fragment>
           ))}
         </div>
       </Reveal>

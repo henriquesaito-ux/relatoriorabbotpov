@@ -952,6 +952,17 @@ function AgenteCTA() {
             <AgentTeamOrganogram showcase />
           </div>
         </Reveal>
+
+        {/* CTA button */}
+        <Reveal delay={300}>
+          <div className="flex justify-center mt-10">
+            <a href="https://rodojacto-agent-report.lovable.app/" target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white font-semibold text-sm px-6 py-3 rounded-lg transition shadow-sm">
+              Ver resultados do agente
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </a>
+          </div>
+        </Reveal>
       </div>
     </section>
   );

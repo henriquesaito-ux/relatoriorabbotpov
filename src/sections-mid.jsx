@@ -722,6 +722,96 @@ function AfterVisual({ kind }) {
   );
 }
 
+// ---------- Terminal de automações (substitui screenshot Kanban) ----------
+function TerminalAutomacoes() {
+  const ref = React.useRef(null);
+  const [visibleCount, setVisibleCount] = useStateM(0);
+  const lines = [
+    { time: '09:14', text: 'Detectou parada não programada', bold: 'Caminhão #4521' },
+    { time: '09:14', text: '', arrow: true, bold: 'acionou time de manutenção' },
+    { time: '09:15', text: 'Checou preventivas vencidas', bold: 'revisão 30k km vencida' },
+    { time: '09:15', text: 'Abriu O.S. interna', bold: 'prioridade alta' },
+    { time: '09:16', text: 'Checou estoque', bold: 'pastilhas em ruptura → acionou compras' },
+    { time: '09:18', text: 'Cotou 3 fornecedores', bold: 'melhor preço selecionado' },
+    { time: '09:18', text: 'Auto-aprovou orçamento', bold: 'entrega em 2h' },
+    { time: '11:30', text: 'Conciliou NF da entrega', bold: 'R$ 1.247 · tudo conforme' },
+    { time: '13:42', text: 'Auditou execução', bold: 'checklist de saída OK' },
+    { time: '13:45', text: '', check: true, bold: 'Veículo liberado · disponível para rota', final: true },
+  ];
+
+  useEffectM(() => {
+    if (!ref.current) return;
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          let i = 0;
+          const show = () => {
+            i++;
+            setVisibleCount(i);
+            if (i < lines.length) setTimeout(show, 500);
+          };
+          setTimeout(show, 300);
+          io.disconnect();
+        }
+      });
+    }, { threshold: 0.3 });
+    io.observe(ref.current);
+    return () => io.disconnect();
+  }, []);
+
+  const botIcon = (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="shrink-0">
+      <rect x="3" y="8" width="18" height="12" rx="3" stroke="#4ade80" strokeWidth="1.5" />
+      <circle cx="9" cy="14" r="1.5" fill="#4ade80" />
+      <circle cx="15" cy="14" r="1.5" fill="#4ade80" />
+      <path d="M12 2v4" stroke="#4ade80" strokeWidth="1.5" strokeLinecap="round" />
+      <circle cx="12" cy="2" r="1" fill="#4ade80" />
+      <path d="M1 14h2M21 14h2" stroke="#4ade80" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+
+  return (
+    <div ref={ref} className="rounded-lg overflow-hidden" style={{ background: '#0f172a', border: '1px solid #1e3a2f' }}>
+      {/* Header */}
+      <div className="px-3 py-2 flex items-center gap-2 border-b" style={{ borderColor: '#1e293b' }}>
+        <span className="relative flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+        </span>
+        <span className="text-[9px] font-bold font-mono uppercase tracking-wider" style={{ color: '#4ade80' }}>Automações em execução</span>
+      </div>
+      {/* Log lines */}
+      <div className="px-3 py-2 flex flex-col gap-0">
+        {lines.map((l, i) => {
+          const visible = i < visibleCount;
+          const isFinal = l.final;
+          return (
+            <div key={i}
+              className={`flex items-start md:items-center gap-1.5 font-mono text-[9px] md:text-[10px] leading-snug py-1 px-1.5 rounded transition-all duration-500 ${
+                visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
+              }`}
+              style={isFinal && visible ? { background: 'rgba(34,197,94,0.1)', borderLeft: '2px solid #22c55e' } : {}}>
+              {/* Timestamp */}
+              <span className="shrink-0 tabular-nums" style={{ color: '#94a3b8' }}>{l.time}</span>
+              <span style={{ color: '#475569' }}>·</span>
+              {/* Bot icon */}
+              {botIcon}
+              <span style={{ color: '#475569' }}>·</span>
+              {/* Action text */}
+              <span className="md:whitespace-nowrap" style={{ color: isFinal ? '#4ade80' : '#e2e8f0' }}>
+                {l.arrow && <span style={{ color: '#4ade80' }}>→ </span>}
+                {l.check && <span style={{ color: '#22c55e' }}>✓ </span>}
+                {l.text && <>{l.text} · </>}
+                <span className={isFinal ? 'font-bold' : 'font-semibold'} style={{ color: isFinal ? '#4ade80' : '#fff' }}>{l.bold}</span>
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function AntesDepoisSection() {
   return (
     <Section id="antes-depois">
@@ -748,17 +838,15 @@ function AntesDepoisSection() {
               </div>
             </div>
           </div>
-          {/* DEPOIS */}
+          {/* DEPOIS — Terminal de automações */}
           <div className="bg-white border-2 border-brand-200 rounded-xl overflow-hidden flex flex-col">
             <div className="px-5 pt-4 pb-2">
               <span className="text-[10px] font-mono uppercase tracking-wider bg-brand-50 text-brand-700 px-2 py-0.5 rounded">Com a Rabbot</span>
-              <h3 className="mt-2 text-base font-semibold text-ink">Kanban integrado em tempo real</h3>
-              <p className="text-sm text-muted mt-1">Visibilidade entre todas as áreas, checklists digitais e ações automáticas sobre os dados.</p>
+              <h3 className="mt-2 text-base font-semibold text-ink">Processos unificados e automatizados</h3>
+              <p className="text-sm text-muted mt-1">Visibilidade total para a equipe, processos integrados entre áreas e execução automática — sem planilha, sem ligação, sem retrabalho.</p>
             </div>
             <div className="p-4 flex-1">
-              <div className="rounded-lg overflow-hidden border border-stone-200/70">
-                <img src="assets/kanbanrabbot.png" alt="Kanban Rabbot" className="w-full h-full object-cover" />
-              </div>
+              <TerminalAutomacoes />
             </div>
           </div>
         </div>

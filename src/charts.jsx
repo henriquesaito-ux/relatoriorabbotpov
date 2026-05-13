@@ -55,10 +55,28 @@ function RadarChart({ data, size = 360 }) {
     let anchor = 'middle';
     if (x < cx - 5) anchor = 'end';
     else if (x > cx + 5) anchor = 'start';
+    // Split long labels into two lines at a natural break
+    const maxChars = 14;
+    let lines = [d.label];
+    if (d.label.length > maxChars) {
+      const words = d.label.split(' ');
+      let line1 = '', line2 = '';
+      for (const w of words) {
+        if (!line2 && (line1 + ' ' + w).trim().length <= maxChars) {
+          line1 = (line1 + ' ' + w).trim();
+        } else {
+          line2 = (line2 + ' ' + w).trim();
+        }
+      }
+      lines = line2 ? [line1, line2] : [line1];
+    }
+    const lineHeight = 13;
+    const startY = y - ((lines.length - 1) * lineHeight) / 2;
     return (
-      <text key={i} x={x} y={y} textAnchor={anchor} dominantBaseline="middle"
-            fontSize="11" fontWeight="500" fill="#64748b">
-        {d.label}
+      <text key={i} x={x} textAnchor={anchor} fontSize="11" fontWeight="500" fill="#64748b">
+        {lines.map((ln, li) => (
+          <tspan key={li} x={x} dy={li === 0 ? 0 : lineHeight} y={li === 0 ? startY : undefined} dominantBaseline="middle">{ln}</tspan>
+        ))}
       </text>
     );
   });
@@ -67,10 +85,10 @@ function RadarChart({ data, size = 360 }) {
     <svg ref={ref} viewBox={`0 0 ${full} ${full}`} className="w-full max-w-[420px] mx-auto">
       {gridPolys}
       {axesLines}
-      <polygon points={dataPts} fill="#059669" fillOpacity="0.14" stroke="#059669" strokeWidth="1.5" strokeLinejoin="round" />
+      <polygon points={dataPts} fill="#f59e0b" fillOpacity="0.18" stroke="#f59e0b" strokeWidth="1.5" strokeLinejoin="round" />
       {data.map((d, i) => {
         const [x, y] = pointAt(i, d.value * animated);
-        return <circle key={i} cx={x} cy={y} r="3" fill="#059669" stroke="#fff" strokeWidth="1.5" />;
+        return <circle key={i} cx={x} cy={y} r="3" fill="#f59e0b" stroke="#fff" strokeWidth="1.5" />;
       })}
       {labels}
       {Array.from({ length: levels }, (_, i) => {
